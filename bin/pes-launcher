@@ -1,0 +1,231 @@
+#!/bin/bash
+
+#################################################
+###               MERVIN MONROE               ###
+#################################################
+#                 pes-launcher                  #
+#################################################
+
+#                by Sergio Boneta
+
+
+## USAGE:   mervinmonroe pes-launcher [options]
+
+
+##  DEFAULT VARIABLES  ##############################################
+
+  name_def="pes"
+  qm_method_def="AM1"
+  qm_charge_def="0"
+
+
+##  SCRIPT  #########################################################
+
+  ## Checks if no arguments are in the input
+  if [ "$1" == "" ]; then
+    echo "ERROR: No input arguments. Use -h for help."
+    exit
+  fi
+
+  ## Input arguments assignment
+  while [ $# -gt 0 ]; do
+    arg="$1"
+    shift
+    case $arg in
+
+      "--name" )              # name of the PES (optional)
+        name=$1
+        shift
+        ;;
+
+      "-s"|"--system" )       # system selection
+        system=$1
+        system_dir=${mervinmonroe}/${systems_subfolder}/${system}
+        shift
+        # check if system is set
+        if [[ ! -d "$system_dir" ]]; then
+          echo "ERROR: System not recognized"
+          exit
+        fi
+        ;;
+
+      "-f"|"--file" )         # configuration file
+        pes_file=$1
+        shift
+        ;;
+
+      "-c"|"--coord" )        # initial coordinate file
+        coord_file=$1
+        shift
+        # check if coordenate file exists
+        if [[ ! -f "${workdir}/${coord_file}" ]]; then
+          echo "ERROR: Coordenate file not found"
+          exit
+        fi
+        ;;
+
+      "--method" )            # QM method
+        qm_method=$1
+        shift
+        ;;
+
+      # "--charge" )            # QM charge
+      #   qm_charge=$1
+      #   shift
+      #   ;;
+
+      "-j" )                 # .job only
+        job_only=1
+        ;;
+
+      "-h"|"--help" )         # print help and exit
+        echo "---------------  MERVIN MONROE  ---------------"
+        echo "     A lazy interface for fDynamo software     "
+        echo
+        echo "Version $mervinmonroe_version"
+        echo
+        echo
+        echo "··············   pes-launcher   ···············"
+        echo
+        echo "USAGE:   mervinmonroe pes-launcher [options]"
+        echo
+        echo "OPTIONS:                                     "
+        echo " --name              name of the PES (def: $name_def)"
+        echo " -s | --system       set the system previously defined"
+        echo " -f | --file         configuration file"
+        echo " -c | --coord        intial coordinates file"
+        echo " --method            QM method (def: $qm_method_def)"
+        # echo " --charge            QM charge (def: $qm_charge_def)"
+        echo " -j                  job only (creates files but do not launch)"
+        echo " -h | --help         print this help and exit"
+        echo
+        exit ;;
+      *)
+        echo "ERROR: Wrong option '$subscript'. Use -h for help."
+        exit ;;
+    esac
+  done
+
+  ## Default variables if not input
+  name=${name:=$name_def}
+  qm_method=${qm_method:=$qm_method_def}
+  # qm_charge=${qm_charge:=$qm_charge_def}
+  job_only=${job_only:=0}
+
+  ## Check for mandatory inputs
+  if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
+  if [ ! -n "$pes_file" ]; then echo "ERROR: No configuration file set"; exit; fi
+  if [ ! -n "$coord_file" ]; then echo "ERROR: No initial coordinates set"; exit; fi
+
+  ## Read config pes file
+  i_val=`sed -n 1p ${workdir}/${pes_file}`
+  j_val=`sed -n 2p ${workdir}/${pes_file}`
+  # read all atoms in an array starting in 0
+  qm_atoms=(`sed -n '/^&$/,/^&$/p' ${workdir}/${pes_file} | sed '/^&/d'`)
+  # count number of atoms
+  qm_atoms_n=`echo "${#qm_atoms[@]} / 3" | bc`
+  # read constrains
+  constr1_line=`echo "$qm_atoms_n+5" | bc`
+  constr1=(`sed -n ${constr1_line}p ${workdir}/${pes_file}`)
+  constr2_line=`echo "$constr1_line+1" | bc`
+  constr2=(`sed -n ${constr2_line}p ${workdir}/${pes_file}`)
+
+  ## Build the f90 file
+  cp ${system_dir}/*.bin  ${workdir}/
+  cp ${system_dir}/nofix.f90  ${workdir}/
+  cp ${mervinmonroe}/${templates_subfolder}/pes/01-pes  ${workdir}/${name}.f90
+  # declare atoms as integers
+  integer_atoms="a1"
+  for n in `seq 2 $qm_atoms_n`; do
+    integer_atoms+=", a${n}"
+  done
+  sed -i "s/MERVIN_ATOMS/$integer_atoms/g" ${workdir}/${name}.f90
+  # set the system binary to be read
+  sed -i "s/MERVIN_BIN/`ls *.bin`/g" ${workdir}/${name}.f90
+  # include the QM atoms
+  cat ${system_dir}/qm-atoms.f90 >> ${workdir}/${name}.f90
+  # continue the f90
+  cat ${mervinmonroe}/${templates_subfolder}/pes/02-pes >> ${workdir}/${name}.f90
+  sed -i "s/MERVIN_METHOD/$qm_method/g" ${workdir}/${name}.f90
+  # define constrained atoms
+  echo >> ${workdir}/${name}.f90
+  for n in `seq 0 $((qm_atoms_n - 1))`; do
+    echo "  a$((n + 1)) = atom_number( subsystem = '${qm_atoms[$((n * 3))]}', residue_number = ${qm_atoms[$((n * 3 + 1))]}, atom_name =  '${qm_atoms[$((n * 3 + 2))]}' )" >> ${workdir}/${name}.f90
+  done
+  echo >> ${workdir}/${name}.f90
+
+  # constrain 1
+  if [ "${constr1[0]}" == "m" ]; then
+    cat ${mervinmonroe}/${templates_subfolder}/pes/03-pes-multiple >> ${workdir}/${name}.f90
+    sed -i "s/MERVIN_FC/${constr1[2]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A1/a${constr1[4]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A2/a${constr1[5]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A3/a${constr1[6]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A4/a${constr1[7]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_D0/${constr1[9]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_STEP/${constr1[10]}/g" ${workdir}/${name}.f90
+    if [ "${constr1[1]}" == "-1" ]; then
+      sed -i "s/MERVIN_WEIGHT/cof_antisym/g" ${workdir}/${name}.f90
+    elif [ "${constr1[1]}" == "1" ]; then
+      sed -i "s/MERVIN_WEIGHT/cof_sym/g" ${workdir}/${name}.f90
+    fi
+  elif [ "${constr1[0]}" == "d" ]; then
+    cat ${mervinmonroe}/${templates_subfolder}/pes/03-pes-distance >> ${workdir}/${name}.f90
+    sed -i "s/MERVIN_FC/${constr1[1]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A1/a${constr1[3]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A2/a${constr1[4]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_D0/${constr1[6]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_STEP/${constr1[7]}/g" ${workdir}/${name}.f90
+  fi
+
+  # constrain 2
+  if [ "${constr2[0]}" == "m" ]; then
+    cat ${mervinmonroe}/${templates_subfolder}/pes/04-pes-multiple >> ${workdir}/${name}.f90
+    sed -i "s/MERVIN_FC/${constr2[2]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A1/a${constr2[4]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A2/a${constr2[5]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A3/a${constr2[6]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A4/a${constr2[7]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_D0/${constr2[9]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_STEP/${constr2[10]}/g" ${workdir}/${name}.f90
+    if [ "${constr2[1]}" == "-1" ]; then
+      sed -i "s/MERVIN_WEIGHT/cof_antisym/g" ${workdir}/${name}.f90
+    elif [ "${constr2[1]}" == "1" ]; then
+      sed -i "s/MERVIN_WEIGHT/cof_sym/g" ${workdir}/${name}.f90
+    fi
+  elif [ "${constr2[0]}" == "d" ]; then
+    cat ${mervinmonroe}/${templates_subfolder}/pes/04-pes-distance >> ${workdir}/${name}.f90
+    sed -i "s/MERVIN_FC/${constr2[1]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A1/a${constr2[3]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_A2/a${constr2[4]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_D0/${constr2[6]}/g" ${workdir}/${name}.f90
+    sed -i "s/MERVIN_STEP/${constr2[7]}/g" ${workdir}/${name}.f90
+  fi
+
+  # print options
+  # constrain 1
+  if [ "${constr1[0]}" == "m" ] && [ "${constr1[1]}" == "-1" ]; then
+    print_constr1="geometry_distance( atmcrd, a${constr1[4]}, a${constr1[5]} ) - geometry_distance( atmcrd, a${constr1[6]}, a${constr1[7]} ), \&"
+  elif [ "${constr1[0]}" == "m" ] && [ "${constr1[1]}" == "1" ]; then
+    print_constr1="geometry_distance( atmcrd, a${constr1[4]}, a${constr1[5]} ) + geometry_distance( atmcrd, a${constr1[6]}, a${constr1[7]} ), \&"
+  elif [ "${constr1[0]}" == "d" ]; then
+    print_constr1="geometry_distance( atmcrd, a${constr1[3]}, a${constr1[4]}), \& "
+  fi
+  # constrain 2
+  if [ "${constr2[0]}" == "m" ] && [ "${constr2[1]}" == "-1" ]; then
+    print_constr2="geometry_distance( atmcrd, a${constr2[4]}, a${constr2[5]} ) - geometry_distance( atmcrd, a${constr2[6]}, a${constr2[7]} ), \&"
+  elif [ "${constr2[0]}" == "m" ] && [ "${constr2[1]}" == "1" ]; then
+    print_constr2="geometry_distance( atmcrd, a${constr2[4]}, a${constr2[5]} ) + geometry_distance( atmcrd, a${constr2[6]}, a${constr2[7]} ), \&"
+  elif [ "${constr2[0]}" == "d" ]; then
+    print_constr2="geometry_distance( atmcrd, a${constr2[3]}, a${constr2[4]} ), \&"
+  fi
+  sed -i "s/MERVIN_PRINT_CONSTR1/$print_constr1/g" ${workdir}/${name}.f90
+  sed -i "s/MERVIN_PRINT_CONSTR2/$print_constr2/g" ${workdir}/${name}.f90
+
+  ## Build the jobber
+  cp ${mervinmonroe}/${templates_subfolder}/pes/jobber  ${workdir}/${name}.jobber
+  sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.jobber
+  sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber
+  sed -i "s/MERVIN_I/${i_val}/g" ${workdir}/${name}.jobber
+  sed -i "s/MERVIN_J/${j_val}/g" ${workdir}/${name}.jobber
+  sed -i "s/MERVIN_COORD/${coord_file}/g" ${workdir}/${name}.jobber

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+#$ -q BIFIZCAM
+#$ -N MERVIN_JOBNAME
+#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -R yes
+
+workdir="MERVIN_WORKDIR"
+i_side=MERVIN_I
+j_side=MERVIN_J
+
+
+## i SIDE (:,0)
+filename="ep.XX.00"
+
+i_min=0
+i_max=$i_side
+j_min=0
+j_max=0
+coord="MERVIN_COORD"
+
+outfile="${filename}.out"
+inputfile="${filename}.inp"
+logfile="${filename}.log"
+
+
+cd $workdir
+echo -e "${i_min} ${i_max} ${j_min} ${j_max} ${coord} ${outfile}" > ${inputfile}
+./a.out < ${inputfile} > ${logfile}
+rm ${inputfile}
+
+## j SIDE (:,:)
+cd $workdir
+for i in `seq -w 0 ${i_side}`; do
+  filename="ep.${i}.XX"
+
+  i_min="$i"
+  i_max="$i"
+  j_min=0
+  j_max=$j_side
+  coord="pes.${i}.00.crd"
+
+  outfile="${filename}.out"
+  jobfile="${filename}.job"
+  inputfile="${filename}.inp"
+  logfile="${filename}.log"
+
+  echo "#!/bin/bash "                              > ${jobfile}
+  echo ""                                          >> ${jobfile}
+  echo "#$ -q BIFIZCAM "                           >> ${jobfile}
+  echo "#$ -N $filename "                          >> ${jobfile}
+  echo "#$ -e /home/boneta/msg/${filename}.msg "   >> ${jobfile}
+  echo "#$ -R yes "                                >> ${jobfile}
+  echo ""                                          >> ${jobfile}
+  echo "cd $workdir" >> ${jobfile}
+  echo "echo \"${i_min} ${i_max} ${j_min} ${j_max} ${coord} ${outfile}\" > ${inputfile}" >> ${jobfile}
+  echo "./a.out < ${inputfile} > ${logfile}" >> ${jobfile}
+  echo "rm ${inputfile}" >> ${jobfile}
+
+  qsub ${jobfile}
+  sleep 1
+
+done

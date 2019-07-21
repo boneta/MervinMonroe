@@ -1,0 +1,19 @@
+program minimization
+
+  use dynamo
+  implicit none
+
+  integer :: i, g
+  logical, dimension(:), allocatable :: acs
+
+  !Print out the header
+  call print_style( .false. )
+  call dynamo_header
+
+  ! read binary file directly (faster)
+  call mm_system_read ( "MERVIN_BIN" )
+
+  ! read coordinates
+  call coordinates_read( "MERVIN_COORD_IN" )
+
+  allocate( acs(1:natoms) )

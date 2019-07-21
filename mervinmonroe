@@ -1,0 +1,81 @@
+#!/bin/bash
+
+#################################################
+###               MERVIN MONROE               ###
+#################################################
+#     A lazy interface for fDynamo software     #
+#################################################
+
+#                by Sergio Boneta
+
+
+## CONFIGURATION:
+  # set $mervinmonroe variable to the main folder path (in '.bashrc')
+  # example: export mervinmonroe="/home/user/bin/mervinmonroe"
+
+  # include this variable in $PATH if desired
+  # example: export PATH=$PATH:"$mervinmonroe"
+
+
+## USAGE:   mervinmonroe [options]
+
+
+##  DEFAULT VARIABLES  ##############################################
+
+  export workdir=`pwd`
+  export systems_subfolder="systems"
+  export scripts_subfolder="bin"
+  export templates_subfolder="templates"
+
+  export mervinmonroe_version="0.1.2 - 22072019"
+
+##  SCRIPT  #########################################################
+
+  ## Check if the $mervinmonroe variable has been set
+  if [ "$mervinmonroe" == "" ]; then
+    echo "ERROR: no '\$mervinmonroe' path variable set"
+    exit
+  fi
+
+  ## Checks if no arguments are in the input
+  if [ "$1" == "" ]; then
+    echo "ERROR: No input arguments. Use -h for help."
+    exit
+  fi
+
+  ## Input arguments assignment
+  subscript="$1"
+  shift
+  case $subscript in
+    "info" )                     # information
+      ${mervinmonroe}/${scripts_subfolder}/info $@
+      ;;
+    "import" )                   # system importer
+      ${mervinmonroe}/${scripts_subfolder}/import $@
+      ;;
+    "minimizator"|"mini" )       # minimization
+      ${mervinmonroe}/${scripts_subfolder}/minimizator $@
+      ;;
+    "pes-launcher" )             # PES calculation launcher
+      ${mervinmonroe}/${scripts_subfolder}/pes-launcher $@
+      ;;
+    "-h"|"--help" )              # print help and exit
+      echo "---------------  MERVIN MONROE  ---------------"
+      echo "     A lazy interface for fDynamo software     "
+      echo
+      echo "Version $mervinmonroe_version"
+      echo
+      echo "USAGE:   mervinmonroe [options]"
+      echo
+      echo "OPTIONS:                                     "
+      echo " info                         information"
+      echo " import                       system importer"
+      echo " minimizator | mini           minimizator"
+      echo " pes-launcher                 PES calculation launcher"
+      echo " -h | --help                  print this help and exit"
+      echo
+      exit ;;
+    *)
+      echo "ERROR: Wrong option '$subscript'. Use -h for help."
+      exit ;;
+  esac

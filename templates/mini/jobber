@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#$ -q BIFIZCAM
+#$ -N MERVIN_JOBNAME
+#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -R yes
+
+
+workdir="MERVIN_WORKDIR"
+cd $workdir
+./a.out > MERVIN_JOBNAME.log

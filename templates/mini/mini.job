@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#$ -q BIFIZCAM
+#$ -N BPET_mini
+#$ -e /home/boneta/msg/BPET.msg
+#$ -R yes
+
+cd /home/boneta/IsPETase/QMMM/BPET/b-mini
+./a.out > mini.log
