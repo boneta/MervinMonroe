@@ -3,7 +3,7 @@ program minimization
   use dynamo
   implicit none
 
-  integer :: i, g
+  integer :: i, g, qm_charge
   logical, dimension(:), allocatable :: acs
 
   !Print out the header

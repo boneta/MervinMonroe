@@ -1,0 +1,56 @@
+
+  do i = i_min, i_max
+    write(si, "(I0.2)") i
+
+    call constraint_initialize
+
+    ! MULTIPLE DISTANCE
+    r1 = MERVIN_D0_dp MERVIN_STEP_dp * real( i, kind=dp )
+    call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A1 /) ) )
+    call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A2 /) ) )
+    call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A3 /) ) )
+    call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A4 /) ) )
+    call constraint_define( type = "MULTIPLE_DISTANCE", &
+                            fc = MERVIN_FC._dp, &
+                            eq = r1, &
+                            weights = MERVIN_WEIGHT )
+
+    ! Calculate gradient
+    call gradient
+    do g = 1, 1000
+      if( grms < 40._dp ) cycle
+      atmcrd = atmcrd - atmder / dsqrt( sum( atmder ** 2 ) ) * 0.01_dp
+      call gradient
+    end do
+
+    ! Minimize Conjugate-Gradient
+    call optimize_conjugate_gradient( &
+      step_size = 0.01_dp, &
+      step_number = 10000, &
+      print_frequency = 1, &
+      gradient_tolerance = 1._dp )
+
+    ! Minimize L-BFGS-B
+    call optimize_lbfgsb( &
+      bracket = 2._dp, &
+      step_number = 10000, &
+      print_frequency = 1, &
+      gradient_tolerance = 1._dp )
+
+    ! Save optimized geometry
+    call coordinates_write( "pes." // trim( si ) // ".crd" )
+
+    write( 900, "(4f20.10)" ) &
+      MERVIN_PRINT_CONSTR1
+      etotal, r1, si
+    call flush( 900 )
+
+  end do
+
+close(900)
+deallocate( flg )
+
+call dynamo_footer
+
+end
+include 'nofix.f90'

@@ -1,0 +1,26 @@
+program pel
+
+  use dynamo
+  implicit none
+
+  integer :: i, j, k, g
+  integer :: MERVIN_ATOMS
+  integer :: i_min, i_max, qm_charge
+  real( kind=dp ) :: r1, r2
+  character ( len=50 ) :: si, sj, sk, coord, outfile
+  logical, dimension(:), allocatable :: acs, flg
+  real( kind=dp ), dimension(1:2) :: cof_sym, cof_antisym
+
+  read(*,*) i_min, i_max, coord, outfile
+
+  open( 900, file= outfile, form= 'FORMATTED' )
+
+  call dynamo_header
+
+  ! read binary file directly (faster)
+  call mm_system_read ( "MERVIN_BIN" )
+
+  ! read coordinates
+  call coordinates_read( trim(coord) )
+
+  allocate( acs(1:natoms), flg(1:natoms) )

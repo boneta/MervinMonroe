@@ -50,6 +50,27 @@
         exit
         ;;
 
+      "--template" )          # print template
+        template=$1
+        case $template in
+          "qm-atoms.f90")
+            cat ${mervinmonroe}/${templates_subfolder}/samples/qm-atoms.f90
+            exit
+          ;;
+          "pes")
+            cat ${mervinmonroe}/${templates_subfolder}/samples/pes.mervin
+            exit
+          ;;
+          "pel")
+            cat ${mervinmonroe}/${templates_subfolder}/samples/pel.mervin
+            exit
+          ;;
+          *)
+            echo "ERROR: Wrong template '$arg'."
+            exit ;;
+        esac
+        ;;
+
       "-h"|"--help" )         # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
@@ -64,6 +85,10 @@
         echo "OPTIONS:                                     "
         echo " -s | --system  <system>          show files of the specified system"
         echo " --sys-avail                      list imported systems"
+        echo " --template  <template name>      print a template sample:"
+        echo "                                    qm-atoms.f90    selection of atoms for the qm part"
+        echo "                                    pes             PES configuration file"
+        echo "                                    pel             PEL configuration file"
         echo " -h | --help                      print this help and exit"
         echo
         exit ;;

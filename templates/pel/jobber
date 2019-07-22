@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#$ -q BIFIZCAM
+#$ -N MERVIN_JOBNAME
+#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -R yes
+
+workdir="MERVIN_WORKDIR"
+i_side=MERVIN_I
+
+## i SIDE (:)
+filename="ep.XX"
+
+i_min=0
+i_max=$i_side
+coord="MERVIN_COORD"
+
+outfile="${filename}.out"
+inputfile="${filename}.inp"
+logfile="${filename}.log"
+
+
+cd $workdir
+echo -e "${i_min} ${i_max} ${coord} ${outfile}" > ${inputfile}
+./a.out < ${inputfile} > ${logfile}
+rm ${inputfile}

@@ -48,16 +48,19 @@
   shift
   case $subscript in
     "info" )                     # information
-      ${mervinmonroe}/${scripts_subfolder}/info $@
+      ${mervinmonroe}/${scripts_subfolder}/info.sh $@
       ;;
     "import" )                   # system importer
-      ${mervinmonroe}/${scripts_subfolder}/import $@
+      ${mervinmonroe}/${scripts_subfolder}/import.sh $@
       ;;
     "minimizator"|"mini" )       # minimization
-      ${mervinmonroe}/${scripts_subfolder}/minimizator $@
+      ${mervinmonroe}/${scripts_subfolder}/minimizator.sh $@
       ;;
-    "pes-launcher" )             # PES calculation launcher
-      ${mervinmonroe}/${scripts_subfolder}/pes-launcher $@
+    "pes" )                      # PES calculation launcher
+      ${mervinmonroe}/${scripts_subfolder}/pes.sh $@
+      ;;
+    "pel" )                      # PEL calculation launcher
+      ${mervinmonroe}/${scripts_subfolder}/pel.sh $@
       ;;
     "-h"|"--help" )              # print help and exit
       echo "---------------  MERVIN MONROE  ---------------"
@@ -71,7 +74,8 @@
       echo " info                         information"
       echo " import                       system importer"
       echo " minimizator | mini           minimizator"
-      echo " pes-launcher                 PES calculation launcher"
+      echo " pes                          PES calculation"
+      echo " pel                          PELine calculation"
       echo " -h | --help                  print this help and exit"
       echo
       exit ;;

@@ -1,0 +1,14 @@
+# Commented line. Will be deleted after process.
+i number
+&
+# Chain  ResNumber  ResName
+B   1 C7
+A 132 OG
+A 209 NE2
+A 209 ND1
+A 209 HD1
+&
+# multiple antisym fc @ a2 a3 a3 a4 @ startvalue steplenght
+m -1 5000 @ 2 3 3 4 @ -1.4 +0.05
+# distance fc @ a1 a2 @ startvalue steplenght
+# d 5000 @ 1 2 @ 2.6 -0.05
