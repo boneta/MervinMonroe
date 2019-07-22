@@ -62,6 +62,20 @@
     "pel" )                      # PEL calculation launcher
       ${mervinmonroe}/${scripts_subfolder}/pel.sh $@
       ;;
+    "tools"|"t" )                # tools
+      subtool=$1
+      shift
+      if [ "$subtool" == "-h" ] || [ "$subtool" == "--help" ]; then
+        ls ${mervinmonroe}/${scripts_subfolder}/tools/ | grep -v "ecmb.*"
+        exit
+      fi
+      if [[ -r "${mervinmonroe}/${scripts_subfolder}/tools/$subtool" ]]; then
+          ${mervinmonroe}/${scripts_subfolder}/tools/$subtool $@
+      else
+        echo "ERROR: Tool '$subtool' not found."
+        exit
+      fi
+      ;;
     "-h"|"--help" )              # print help and exit
       echo "---------------  MERVIN MONROE  ---------------"
       echo "     A lazy interface for fDynamo software     "
@@ -76,6 +90,7 @@
       echo " minimizator | mini           minimizator"
       echo " pes                          PES calculation"
       echo " pel                          PELine calculation"
+      echo " tools | t                    tools (miscellaneous)"
       echo " -h | --help                  print this help and exit"
       echo
       exit ;;

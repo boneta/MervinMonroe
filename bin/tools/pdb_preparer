@@ -1,0 +1,52 @@
+#!/bin/bash
+
+## pdb file preparer
+# from GROMACS and AMBER ff
+
+infile=$1
+filename=${infile%.*}
+outfile="${filename}-modif.pdb"
+
+cp $infile $outfile
+
+# check if pdb4amber is available and execute
+#pdb4amber > /dev/null 2>&1
+#if [ "$?" == 0 ]; then
+#  pdb4amber -i $infile -o $outfile
+#  rm -f ${outfile%.*}_nonprot.pdb
+#  rm -f ${outfile%.*}_renum.txt
+#  rm -f ${outfile%.*}_sslink
+#else
+#  echo "CAUTION: pdb4amber not found"
+#fi
+
+## replace HETATM by ATOM
+  sed -i 's/HETATM/ATOM  /g' $outfile
+
+## replace wrong hydrogen names
+  # HH
+  sed -i 's/1HH1/HH11/g' $outfile
+  sed -i 's/2HH1/HH12/g' $outfile
+  sed -i 's/1HH2/HH21/g' $outfile
+  sed -i 's/2HH2/HH22/g' $outfile
+  # HD
+  sed -i 's/1HD1/HD11/g' $outfile
+  sed -i 's/2HD1/HD12/g' $outfile
+  sed -i 's/3HD1/HD13/g' $outfile
+  sed -i 's/1HD2/HD21/g' $outfile
+  sed -i 's/2HD2/HD22/g' $outfile
+  sed -i 's/3HD2/HD23/g' $outfile
+  # HE
+  sed -i 's/1HE2/HE21/g' $outfile
+  sed -i 's/2HE2/HE22/g' $outfile
+  # HG
+  sed -i 's/1HG1/HG11/g' $outfile
+  sed -i 's/2HG1/HG12/g' $outfile
+  sed -i 's/3HG1/HG13/g' $outfile
+  sed -i 's/1HG2/HG21/g' $outfile
+  sed -i 's/2HG2/HG22/g' $outfile
+  sed -i 's/3HG2/HG23/g' $outfile
+
+## delete chain letter
+
+## add chain letters at right (A, B, BOX, CL)

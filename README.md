@@ -14,13 +14,17 @@ mervinmonroe [options]
   * info
   * import
   * minimizator
-  * pes-launcher
-  
-### Configuration
-  set `$mervinmonroe` variable to the main folder path (in '.bashrc') (example: `export mervinmonroe="/home/user/bin/mervinmonroe"`)
+  * pes
+  * pel
+  * tools
 
- 
- include this variable in $PATH if desired (example: `export PATH=$PATH:"$mervinmonroe"`)
+### Configuration
+  Set `mervinmonroe` variable to the main folder path (in '.bashrc')
+
+    example: `export mervinmonroe="/home/user/bin/mervinmonroe"`
+
+
+  Include this variable in $PATH if desired (example: `export PATH=$PATH:"$mervinmonroe"`)
 
 
 ### Download

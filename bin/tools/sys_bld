@@ -1,0 +1,27 @@
+#!/bin/bash
+
+## build system for fDynamo (.bin)
+
+if [ "$1" != "" ]; then
+  basename=$1
+else
+  read -p 'Base name of files: ' basename
+fi
+
+fortname="bld.f90"
+
+cat > $fortname <<EOD
+program builder
+  use dynamo
+  implicit none
+  call dynamo_header
+  call mm_file_process( "borra", "opls_${basename}" )
+  call mm_system_construct( "borra", "${basename}.seq" )
+  call mm_system_write( "${basename}.bin" )
+  call coordinates_read( "${basename}.crd" )
+end
+EOD
+
+dynamer bld.f90 
+./a.out
+rm -f borra

@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+import sys
+import ecmb
+
+file = sys.argv[1]
+
+print "-- Selection of flexible environment for fDynamo --"
+print ""
+radius = input("Radius of flexibility (A): ")
+print ""
+chain_letter = raw_input("Chain letter: ")
+resi_number = input("Residue number: ")
+atom_number = input("Atom number: ")
+
+m = ecmb.Molec()
+m.load_crd( file )
+s = ecmb.Sele()
+s.select( m, chain_letter, resid=[resi_number], atom=[atom_number] )
+s.count()
+x = ecmb.Sele()
+x.sph_sel( m, s, radius )
+m.dynamo_sele( "nofix.f90", x )
+m.save_pdb("nofix.pdb",sele=x)
+
+print ""

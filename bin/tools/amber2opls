@@ -1,0 +1,349 @@
+#!/usr/bin/env python
+
+import numpy as np
+# import scipy as sp
+# from scipy.optimize import curve_fit
+
+# outfile = open("found", 'w')
+
+## infiles
+# example
+# C*        NA                                    # bonds
+# CA        C         N                           # angles
+# C         CA        CT        CV                # dihedrals
+# C         CV        CA        CT                # impropers
+
+infile_bonds = open("missing-bonds", 'r')
+infile_angles = open("missing-angles", 'r')
+infile_dihedrals = open("missing-dihedrals", 'r')
+infile_impropers = open("missing-impropers", 'r')
+
+## references (parameters) (GMX_OPLS itp files)
+# example
+#      1     10   1 ;    1.4866e-01    4.0125e+05 ;    P  O2         x  O                           # bonds
+#      1     16     12      1 ;    1.1954e+02    6.5036e+02 ;    P  O  CT       x  x  CT      # angles
+#      1     16     12      4      9 ;     0.00   1.60387   3 ;    P   O   CT   CT                    # dihedrals
+#      4     28     48     47      4 ;   180.00   4.60240   2 ;    CT    CA   NA   C*                 # impropers
+
+reference_bonds = open("NADPH_GMX_OPLS-bonds.itp", 'r')
+reference_angles = open("NADPH_GMX_OPLS-angles.itp", 'r')
+reference_dihedrals = open("NADPH_GMX_OPLS-dihedrals.itp", 'r')
+reference_impropers = open("NADPH_GMX_OPLS-impropers.itp", 'r')
+
+### BONDS ###########################################################
+
+print "!! BONDS !!"
+
+# read bonds atoms
+atom1_in, atom2_in = [], []
+for line in infile_bonds :
+    atom1_in.append(line.split()[0])
+    atom2_in.append(line.split()[1])
+
+# delete repeated bonds
+for i in range(len(atom1_in)) :
+    j = i + 1
+    while j < len(atom1_in) :
+        if ((atom1_in[i] == atom1_in[j] and atom2_in[i] == atom2_in[j]) or
+            (atom1_in[i] == atom2_in[j] and atom2_in[i] == atom1_in[j])) :
+            atom1_in.pop(j)
+            atom2_in.pop(j)
+            continue
+        j = j + 1
+
+# read reference bonds
+atom1_ref, atom2_ref = [], []
+param_r = []
+param_k = []
+for line in reference_bonds :
+    atom1_ref.append(line.split()[7])
+    atom2_ref.append(line.split()[8])
+    param_r.append(line.split()[4])
+    param_k.append(line.split()[5])
+
+# search for parameters (keep the first found)
+for i in range(len(atom1_in)) :
+    for j in range(len(atom1_ref)) :
+        if (( atom1_in[i] == atom1_ref[j] and atom2_in[i] == atom2_ref[j] ) or
+             (atom1_in[i] == atom2_ref[j] and atom2_in[i] == atom1_ref[j])) :
+            print ( "%-4s %-4s %5.1f  %5.3f" % (atom1_in[i], atom2_in[i], float(param_k[j])/1000, float(param_r[j])*10 ))
+            break
+        if j+1 == len(atom1_ref) :
+            print ( "%-4s %-4s %5.1f  %5.3f  %50s" % (atom1_in[i], atom2_in[i], 0.0, 0.0, "! Caution. Parameters not found." ))
+
+print ""
+
+### ANGLES ##########################################################
+
+print "!! ANGLES !!"
+
+# read angles atoms
+atom1_in, atom2_in, atom3_in = [], [], []
+for line in infile_angles :
+    atom1_in.append(line.split()[0])
+    atom2_in.append(line.split()[1])
+    atom3_in.append(line.split()[2])
+
+# delete repeated angles
+for i in range(len(atom1_in)) :
+    j = i + 1
+    while j < len(atom1_in) :
+        if ((atom1_in[i] == atom1_in[j] and atom2_in[i] == atom2_in[j] and atom3_in[i] == atom3_in[j]) or
+            (atom1_in[i] == atom3_in[j] and atom2_in[i] == atom2_in[j] and atom3_in[i] == atom1_in[j])) :
+            atom1_in.pop(j)
+            atom2_in.pop(j)
+            atom3_in.pop(j)
+            continue
+        j = j + 1
+
+# read reference angles
+atom1_ref, atom2_ref, atom3_ref = [], [], []
+param_theta = []
+param_cth = []
+for line in reference_angles :
+    atom1_ref.append(line.split()[8])
+    atom2_ref.append(line.split()[9])
+    atom3_ref.append(line.split()[10])
+    param_theta.append(line.split()[5])
+    param_cth.append(line.split()[6])
+
+for i in range(len(atom1_in)) :
+    for j in range(len(atom1_ref)) :
+        if (( atom1_in[i] == atom1_ref[j] and atom2_in[i] == atom2_ref[j] and atom3_in[i] == atom3_ref[j] ) or
+             (atom1_in[i] == atom3_ref[j] and atom2_in[i] == atom2_ref[j] and atom3_in[i] == atom1_ref[j] )) :
+            print ( "%-4s %-4s %-4s %4.1f  %6.2f" % (atom1_in[i], atom2_in[i], atom3_in[i], float(param_cth[j])/10, float(param_theta[j]) ))
+            break
+        if j+1 == len(atom1_ref) :
+            print ( "%-4s %-4s %-4s %4.1f  %6.2f  %50s" % (atom1_in[i], atom2_in[i], atom3_in[i], 0.0, 0.0, "! Caution. Parameters not found." ))
+
+print ""
+
+## Torsion energies
+# AMBER torsion energy
+def energy_amber( angle, divider, phase, kd ) :
+    energy = 0
+    for i in range(len(divider)) :
+        if divider[i] != 0 :
+            energy = energy + ( kd[i]/divider[i] * (1 +  np.cos(i*angle-phase[i])) )
+    return energy
+
+# OPLS-AA torsion energy
+def energy_opls ( angle, V0, V1, V2, V3 ) :
+    return V0/2 + V1/2*(1+np.cos(angle)) + V2/2*(1-np.cos(2*angle)) + V3/2*(1+np.cos(3*angle))
+
+# x_deg=map(float,range(361))
+# x_rad=map(np.radians,x_deg)
+
+### DIHEDRALS #######################################################
+
+print "!! DIHEDRALS !!"
+
+# read dihedrals atoms
+atom1_in, atom2_in, atom3_in, atom4_in = [], [], [], []
+for line in infile_dihedrals :
+    atom1_in.append(line.split()[0])
+    atom2_in.append(line.split()[1])
+    atom3_in.append(line.split()[2])
+    atom4_in.append(line.split()[3])
+
+# delete repeated angles
+for i in range(len(atom1_in)) :
+    j = i + 1
+    while j < len(atom1_in) :
+        if atom1_in[i] == atom1_in[j] and atom2_in[i] == atom2_in[j] and atom3_in[i] == atom3_in[j] and atom4_in[i] == atom4_in[j] :
+            atom1_in.pop(j)
+            atom2_in.pop(j)
+            atom3_in.pop(j)
+            atom4_in.pop(j)
+            continue
+        j = j + 1
+
+# read reference dihedrals
+atom1_ref, atom2_ref, atom3_ref, atom4_ref = [], [], [], []
+param_divider = []
+param_phase = []
+param_kd = []        # also named PK
+param_pn = []
+for line in reference_dihedrals :
+    atom1_ref.append(line.split()[10])
+    atom2_ref.append(line.split()[11])
+    atom3_ref.append(line.split()[12])
+    atom4_ref.append(line.split()[13])
+    param_divider.append(int(line.split()[4]))
+    param_phase.append(float(line.split()[6]))
+    param_kd.append(float(line.split()[7]))
+    param_pn.append(int(line.split()[8]))
+
+
+# collect values for every dihedral (if repeated, the last found is kept)
+for i in range(len(atom1_in)) :
+    # initializate values for every dihedral
+    Vval = [0]*4
+    divider, phase, kd = [0]*5, [0]*5, [0]*5
+    # run all the reference values for every dihedral
+    for j in range(len(atom1_ref)) :
+        if (( atom1_in[i] == atom1_ref[j] and atom2_in[i] == atom2_ref[j] and atom3_in[i] == atom3_ref[j] and atom4_in[i] == atom4_ref[j] )) :
+            divider[param_pn[j]] = param_divider[j]
+            phase[param_pn[j]] =  np.radians(param_phase[j])
+            kd[param_pn[j]] = param_kd[j]
+    # try in the oposite way if nothing was found before
+    if np.all(np.asarray(kd)==0) :
+        for j in range(len(atom1_ref)) :
+            if (( atom1_in[i] == atom4_ref[j] and atom2_in[i] == atom2_ref[j] and atom3_in[i] == atom3_ref[j] and atom4_in[i] == atom1_ref[j] )) :
+                divider[param_pn[j]] = param_divider[j]
+                phase[param_pn[j]] =  np.radians(param_phase[j])
+                kd[param_pn[j]] = param_kd[j]
+    # swap the internal atoms (TO DO: check if this is important)
+    if np.all(np.asarray(kd)==0) :
+        for j in range(len(atom1_ref)) :
+            if (( atom1_in[i] == atom1_ref[j] and atom2_in[i] == atom3_ref[j] and atom3_in[i] == atom2_ref[j] and atom4_in[i] == atom4_ref[j] )) :
+                divider[param_pn[j]] = param_divider[j]
+                phase[param_pn[j]] =  np.radians(param_phase[j])
+                kd[param_pn[j]] = param_kd[j]
+    if np.all(np.asarray(kd)==0) :
+        for j in range(len(atom1_ref)) :
+            if (( atom1_in[i] == atom4_ref[j] and atom2_in[i] == atom3_ref[j] and atom3_in[i] == atom2_ref[j] and atom4_in[i] == atom1_ref[j] )) :
+                divider[param_pn[j]] = param_divider[j]
+                phase[param_pn[j]] =  np.radians(param_phase[j])
+                kd[param_pn[j]] = param_kd[j]
+
+    # if still not found, print all zeros and a warning message
+    if np.all(np.asarray(kd)==0) :
+        print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f         %-50s" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], 0.0, 0.0, 0.0, 0.0, "! Caution. Parameters not found."))
+        continue
+
+    ## Kasia Style (Excel)
+    for k in range(len(Vval)) :
+        if divider[k] != 0 :
+            if k==1 and phase[k] == np.pi :
+                Vval[k] = -2* kd[k] / divider[k]
+            else :
+                Vval[k] = 2* kd[k] / divider[k]
+    Vval[0] = 2* (- energy_opls ( 0., *Vval ) + energy_amber( 0., divider, phase, kd ))
+    # check if correct
+    if energy_amber( 0., divider, phase, kd ) - energy_opls ( 0., *Vval ) <= 10e-6 and energy_amber( 2.1, divider, phase, kd ) - energy_opls ( 2.1, *Vval ) <= 10e-6:
+        print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], Vval[0], Vval[1], Vval[2], Vval[3]))
+    # alternative method (invert and correct 0)
+    else :
+        Vval[0] = 0
+        Vval = [-1*x for x in Vval]
+        Vval[0] = 2* (- energy_opls ( 0., *Vval ) + energy_amber( 0., divider, phase, kd ))
+        if energy_amber( 0., divider, phase, kd ) - energy_opls ( 0., *Vval ) <= 10e-6 and energy_amber( 2.1, divider, phase, kd ) - energy_opls ( 2.1, *Vval ) <= 10e-6:
+            print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], Vval[0], Vval[1], Vval[2], Vval[3]))
+        else :
+            print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f         %-50s" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], Vval[0], Vval[1], Vval[2], Vval[3], "! ERROR. Parameters do not match." ))
+            print "! Divider:", divider, " kd:", kd, " phase:", phase
+
+    ## FUNCTION FITTING (not working properly in all cases)
+    # y_amber=[energy_amber(x, divider, phase, kd) for x in x_rad]
+    # Vbounds=[(0,0.1,0.1),(1e-10,20.,20.)]
+    # Vinitial=np.array([0,1.,1.])
+    # Vopt, popv = curve_fit(energy_opls, x_rad, y_amber,Vinitial, bounds=Vbounds, method='dogbox')
+    # print energy_amber(2.1, divider, phase, kd), energy_opls(2.1, *Vopt), Vopt
+
+print ""
+
+### IMPROPERS #######################################################
+
+print "!! IMPROPERS !!"
+
+# read impropers atoms
+atom1_in, atom2_in, atom3_in, atom4_in = [], [], [], []
+for line in infile_impropers :
+    atom1_in.append(line.split()[0])
+    atom2_in.append(line.split()[1])
+    atom3_in.append(line.split()[2])
+    atom4_in.append(line.split()[3])
+
+# delete repeated angles
+for i in range(len(atom1_in)) :
+    j = i + 1
+    while j < len(atom1_in) :
+        if atom1_in[i] == atom1_in[j] and atom2_in[i] == atom2_in[j] and atom3_in[i] == atom3_in[j] and atom4_in[i] == atom4_in[j] :
+            atom1_in.pop(j)
+            atom2_in.pop(j)
+            atom3_in.pop(j)
+            atom4_in.pop(j)
+            continue
+        j = j + 1
+
+# read reference impropers
+atom1_ref, atom2_ref, atom3_ref, atom4_ref = [], [], [], []
+param_divider = []
+param_phase = []
+param_kd = []        # also named PK
+param_pn = []
+for line in reference_impropers :
+    atom1_ref.append(line.split()[10])
+    atom2_ref.append(line.split()[11])
+    atom3_ref.append(line.split()[12])
+    atom4_ref.append(line.split()[13])
+    param_divider.append(int(line.split()[4]))
+    param_phase.append(float(line.split()[6]))
+    param_kd.append(float(line.split()[7]))
+    param_pn.append(int(line.split()[8]))
+
+# divider hack (otherwise wrong results)
+param_divider = [ 2.092*x for x in param_divider]   # fitted number, do not try to find logic
+
+
+# collect values for every dihedral (if repeated, the last found is kept)
+for i in range(len(atom1_in)) :
+    # initializate values for every dihedral
+    Vval = [0]*4
+    divider, phase, kd = [0]*5, [0]*5, [0]*5
+    # run all the reference values for every dihedral
+    for j in range(len(atom1_ref)) :
+        if (( atom1_in[i] == atom1_ref[j] and atom2_in[i] == atom2_ref[j] and atom3_in[i] == atom3_ref[j] and atom4_in[i] == atom4_ref[j] )) :
+            divider[param_pn[j]] = param_divider[j]
+            phase[param_pn[j]] =  np.radians(param_phase[j])
+            kd[param_pn[j]] = param_kd[j]
+    # try in the oposite way if nothing was found before
+    if np.all(np.asarray(kd)==0) :
+        for j in range(len(atom1_ref)) :
+            if (( atom1_in[i] == atom4_ref[j] and atom2_in[i] == atom2_ref[j] and atom3_in[i] == atom3_ref[j] and atom4_in[i] == atom1_ref[j] )) :
+                divider[param_pn[j]] = param_divider[j]
+                phase[param_pn[j]] =  np.radians(param_phase[j])
+                kd[param_pn[j]] = param_kd[j]
+    # swap the internal atoms (TO DO: check if this is important)
+    if np.all(np.asarray(kd)==0) :
+        for j in range(len(atom1_ref)) :
+            if (( atom1_in[i] == atom1_ref[j] and atom2_in[i] == atom3_ref[j] and atom3_in[i] == atom2_ref[j] and atom4_in[i] == atom4_ref[j] )) :
+                divider[param_pn[j]] = param_divider[j]
+                phase[param_pn[j]] =  np.radians(param_phase[j])
+                kd[param_pn[j]] = param_kd[j]
+    if np.all(np.asarray(kd)==0) :
+        for j in range(len(atom1_ref)) :
+            if (( atom1_in[i] == atom4_ref[j] and atom2_in[i] == atom3_ref[j] and atom3_in[i] == atom2_ref[j] and atom4_in[i] == atom1_ref[j] )) :
+                divider[param_pn[j]] = param_divider[j]
+                phase[param_pn[j]] =  np.radians(param_phase[j])
+                kd[param_pn[j]] = param_kd[j]
+
+    # if still not found, print all zeros and a warning message
+    if np.all(np.asarray(kd)==0) :
+        print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f         %-50s" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], 0.0, 0.0, 0.0, 0.0, "! Caution. Parameters not found."))
+        continue
+
+    ## Kasia Style (Excel)
+    for k in range(len(Vval)) :
+        if divider[k] != 0 :
+            if k==1 and phase[k] == np.pi :
+                Vval[k] = -2* kd[k] / divider[k]
+            else :
+                Vval[k] = 2* kd[k] / divider[k]
+    Vval[0] = 2* (- energy_opls ( 0., *Vval ) + energy_amber( 0., divider, phase, kd ))
+    # check if correct
+    if energy_amber( 0., divider, phase, kd ) - energy_opls ( 0., *Vval ) <= 10e-6 and energy_amber( 2.1, divider, phase, kd ) - energy_opls ( 2.1, *Vval ) <= 10e-6:
+        print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], Vval[0], Vval[1], Vval[2], Vval[3]))
+    # alternative method (invert and correct 0)
+    else :
+        Vval[0] = 0
+        Vval = [-1*x for x in Vval]
+        Vval[0] = 2* (- energy_opls ( 0., *Vval ) + energy_amber( 0., divider, phase, kd ))
+        if energy_amber( 0., divider, phase, kd ) - energy_opls ( 0., *Vval ) <= 10e-6 and energy_amber( 2.1, divider, phase, kd ) - energy_opls ( 2.1, *Vval ) <= 10e-6:
+            print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], Vval[0], Vval[1], Vval[2], Vval[3]))
+        else :
+            print ( "%-4s %-4s %-4s %-4s %7.3f %7.3f %7.3f %7.3f         %-50s" % (atom1_in[i], atom2_in[i], atom3_in[i], atom4_in[i], Vval[0], Vval[1], Vval[2], Vval[3], "! ERROR. Parameters do not match." ))
+            print "! Divider:", divider, " kd:", kd, " phase:", phase
+
+print ""
