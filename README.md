@@ -21,7 +21,7 @@ mervinmonroe [options]
 ### Configuration
   Set `mervinmonroe` variable to the main folder path (in '.bashrc')
 
-    example: `export mervinmonroe="/home/user/bin/mervinmonroe"`
+   example: `export mervinmonroe="/home/user/bin/mervinmonroe"`
 
 
   Include this variable in $PATH if desired (example: `export PATH=$PATH:"$mervinmonroe"`)
