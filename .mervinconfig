@@ -1,0 +1,24 @@
+#!/bin/bash
+
+##  USER VARIABLES  #################################################
+
+  export dynamo_std="/home/"
+  export dynamo_gauss="/home/"
+
+
+
+
+
+
+# Execute only once (the first time)
+
+if [ "true" == "true" ]; then
+  cd $mervinmonroe
+  chmod +x mervinmonroe
+  chmod +x -R bin/
+  sed -i "s/true/false/" ${mervinmonroe}/.mervinconfig
+  if [[ ! -d "systems" ]]; then
+    mkdir systems
+  fi
+  cd -
+fi

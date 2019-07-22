@@ -27,9 +27,11 @@
   export scripts_subfolder="bin"
   export templates_subfolder="templates"
 
-  export mervinmonroe_version="0.1.2 - 22072019"
+  export mervinmonroe_version="0.1.3 - 22072019"
 
 ##  SCRIPT  #########################################################
+  ## Execute configuration file
+    bash ${mervinmonroe}/.mervinconfig
 
   ## Check if the $mervinmonroe variable has been set
   if [ "$mervinmonroe" == "" ]; then
