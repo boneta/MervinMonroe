@@ -13,9 +13,11 @@ mervinmonroe [options]
 
   * info
   * import
+  * compile
   * minimizator
+  * pel / scan
   * pes
-  * pel
+  * locate
   * tools
 
 ### Configuration
