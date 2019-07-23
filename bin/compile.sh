@@ -81,8 +81,6 @@
   # if [ ! -n "$dynamo_v" ]; then echo "ERROR: No Dynamo version specified"; exit; fi
   if [ ! -n "$code_file" ]; then echo "ERROR: No code file (.f90)"; exit; fi
 
-  cd $workdir
-
   case $dynamo_v in
     "std" )
       dydir=$dynamo_std

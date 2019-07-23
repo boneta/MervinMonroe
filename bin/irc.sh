@@ -142,6 +142,8 @@
       cp $coord_file ${name}-back/
       cp ${name}.f90 ${name}-back/${name}-back.f90
       cd ${name}-back
+      cp ${system_dir}/*.bin  .
+      cp ${system_dir}/nofix.f90  .
       sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-back.f90
       sed -i "s/MERVIN_COORD_OUT/${name}-back/g" ${name}-back.f90
       ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-back.f90
@@ -155,6 +157,8 @@
       cp $coord_file ${name}-for/
       mv ${name}.f90 ${name}-for/${name}-for.f90
       cd ${name}-for
+      cp ${system_dir}/*.bin  .
+      cp ${system_dir}/nofix.f90  .
       sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-for.f90
       sed -i "s/MERVIN_COORD_OUT/${name}-for/g" ${name}-for.f90
       ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-for.f90
@@ -165,6 +169,8 @@
     ;;
     "back" )
       mv ${name}.f90 ${name}-back.f9
+      cp ${system_dir}/*.bin  .
+      cp ${system_dir}/nofix.f90  .
       sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-back.f90
       sed -i "s/MERVIN_COORD_OUT/${name}-back/g" ${name}-back.f90
       ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-back.f90
@@ -174,6 +180,8 @@
     ;;
     "for" )
       mv ${name}.f90 ${name}-for.f9
+      cp ${system_dir}/*.bin  .
+      cp ${system_dir}/nofix.f90  .
       sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-for.f90
       sed -i "s/MERVIN_COORD_OUT/${name}-for/g" ${name}-for.f90
       ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-for.f90
