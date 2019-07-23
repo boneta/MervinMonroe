@@ -1,0 +1,8 @@
+HOME =	/home/qtc/Sergio/bin/dynamo-OPLS
+
+FC	 =	gfortran
+FLGS =	-DF95 -I$(HOME)/modules -w -O2 -frecord-marker=4
+
+all:
+	$(FC) $(FLGS) -c panadero.f90
+	$(FC) $(FLGS) panadero.o $(SRC) $(HOME)/DYNAMO.a

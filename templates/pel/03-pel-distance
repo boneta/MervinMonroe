@@ -38,9 +38,9 @@
     ! Save optimized geometry
     call coordinates_write( "pel." // trim( si ) // ".crd" )
 
-    write( 900, "(4f20.10)" ) &
+    write( 900, "(3f20.10, 3X, I3)" ) &
       MERVIN_PRINT_CONSTR1
-      etotal, r1, si
+      etotal, r1, i
     call flush( 900 )
 
 

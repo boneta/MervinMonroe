@@ -26,7 +26,7 @@ mervinmonroe [options]
 
   Include this variable in $PATH if desired (example: `export PATH=$PATH:"$mervinmonroe"`)
 
-  Write the paths for the _Dynamo Standard_ and _Dynamo with Gaussian_ folders in the `.mervinconfig` file and execute with bash. This will avoid permission problems.
+  Write the paths for the _Dynamo Standard_ and _Dynamo with Gaussian_ folders in the `.mervinconfig` file and execute once and only for the first time with `bash`. This will avoid permission problems.
 
    example: `bash .mervinconfig`
 

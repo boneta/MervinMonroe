@@ -32,10 +32,10 @@
       ! Save optimized geometry
       call coordinates_write( "pes." // trim( si ) // "." // trim( sj ) // ".crd" )
 
-      write( 900, "(7f20.10)" ) &
+      write( 900, "(5f20.10, 3X, I3, 3X, I3)" ) &
         MERVIN_PRINT_CONSTR1
         MERVIN_PRINT_CONSTR2
-        etotal, r1, r2, si, sj
+        etotal, r1, r2, i, j
       call flush( 900 )
 
     end do

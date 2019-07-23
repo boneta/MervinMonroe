@@ -3,24 +3,20 @@
 #################################################
 ###               MERVIN MONROE               ###
 #################################################
-#                  minimizator                  #
+#                    locate                     #
 #################################################
 
 #                by Sergio Boneta
 
 
-## USAGE:   mervinmonroe minimizator [options]
+## USAGE:   mervinmonroe locate [options]
 
 
 ##  DEFAULT VARIABLES  ##############################################
 
-  name_def="mini"
+  name_def="locate"
   qm_method_def="AM1"
-  # qm_charge_def="0"
-  cg_steps_def=100000
-  cg_tolerance_def=0.2
-  lbfgsb_steps_def=1000
-  lbfgsb_tolerance_def=0.1
+  ts_search_def=".false."
 
 
 ##  SCRIPT  #########################################################
@@ -37,7 +33,7 @@
     shift
     case $arg in
 
-      "--name" )              # name of the minimization (optional)
+      "--name" )              # name of the location
         name=$1
         shift
         ;;
@@ -52,6 +48,11 @@
           exit
         fi
         ;;
+
+      # "-f"|"--file" )         # configuration file
+      #   pel_file=$1
+      #   shift
+      #   ;;
 
       "-c"|"--coord" )        # initial coordinate file
         coord_file=$1
@@ -68,24 +69,8 @@
         shift
         ;;
 
-      "--cg-steps" )         # Conjugate Gradient maximum steps
-        cg_steps=$1
-        shift
-        ;;
-
-      "--cg-tolerance" )     # Conjugate Gradient convergence tolerance
-        cg_tolerance=$1
-        shift
-        ;;
-
-      "--lbfgsb-steps" )     # L-BFGS-B maximum steps
-        lbfgsb_steps=$1
-        shift
-        ;;
-
-      "--lbfgsb-tolerance" ) # L-BFGS-B convergence tolerance
-        lbfgsb_tolerance=$1
-        shift
+      "-ts" )                # TS - Saddle point search
+        ts_search=".true."
         ;;
 
       "-j" )                 # .job only
@@ -99,21 +84,19 @@
         echo "Version $mervinmonroe_version"
         echo
         echo
-        echo "··············   minimizator   ················"
+        echo "··············      locate      ···············"
         echo
-        echo "USAGE:   mervinmonroe minimizator [options]"
+        echo "USAGE:   mervinmonroe locate [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name  <name>                        name of the minimization (def: $name_def)"
-        echo " -s | --system  <system>               set the system (must be already imported)"
-        echo " -c | --coord  <.crd>                  intial coordinates file"
-        echo " --method  <qm method>                 QM method (def: $qm_method_def)"
-        echo " --cg-steps  <#>                       Conjugate Gradient maximum steps (def: $cg_steps_def)"
-        echo " --cg-tolerance  <#>                   Conjugate Gradient convergence tolerance (def: $cg_tolerance_def)"
-        echo " --lbfgsb-steps  <#>                   L-BFGS-B maximum steps (def: $lbfgsb_steps_def)"
-        echo " --lbfgsb-tolerance  <#>               L-BFGS-B convergence tolerance (def: $lbfgsb_tolerance_def)"
-        echo " -j                           job only (creates files but do not launch)"
-        echo " -h | --help                  print this help and exit"
+        echo " --name              name of the pel (def: $name_def)"
+        echo " -s | --system       set the system previously defined"
+        # echo " -f | --file         configuration file"
+        echo " -c | --coord        intial coordinates file"
+        echo " --method            QM method (def: $qm_method_def)"
+        echo " -ts                 TS search"
+        echo " -j                  job only (creates files but do not launch)"
+        echo " -h | --help         print this help and exit"
         echo
         exit ;;
       *)
@@ -125,21 +108,18 @@
   ## Default variables if not input
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
-  cg_steps=${cg_steps:=$cg_steps_def}
-  cg_tolerance=${cg_tolerance:=$cg_tolerance_def}
-  lbfgsb_steps=${lbfgsb_steps:=$lbfgsb_steps_def}
-  lbfgsb_tolerance=${lbfgsb_tolerance:=$lbfgsb_tolerance_def}
+  ts_search=${ts_search:=$ts_search_def}
   job_only=${job_only:=0}
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
+  # if [ ! -n "$pel_file" ]; then echo "ERROR: No configuration file set"; exit; fi
   if [ ! -n "$coord_file" ]; then echo "ERROR: No initial coordinates set"; exit; fi
-
 
   ## Build the f90 file
   cp ${system_dir}/*.bin  ${workdir}/
   cp ${system_dir}/nofix.f90  ${workdir}/
-  cp ${mervinmonroe}/${templates_subfolder}/mini/01-mini  ${workdir}/${name}.f90
+  cp ${mervinmonroe}/${templates_subfolder}/locate/01-locate  ${workdir}/${name}.f90
 
   # set the system binary to be read
   sed -i "s/MERVIN_BIN/`ls *.bin`/g" ${workdir}/${name}.f90
@@ -148,20 +128,17 @@
   # include the QM atoms
   cat ${system_dir}/qm-atoms.f90 >> ${workdir}/${name}.f90
   # continue the f90
-  cat ${mervinmonroe}/${templates_subfolder}/mini/02-mini >> ${workdir}/${name}.f90
+  cat ${mervinmonroe}/${templates_subfolder}/locate/02-locate >> ${workdir}/${name}.f90
   sed -i "s/MERVIN_METHOD/$qm_method/g" ${workdir}/${name}.f90
-  # optimization algorithms options
-  sed -i "s/MERVIN_CG_STEPS/$cg_steps/g" ${workdir}/${name}.f90
-  sed -i "s/MERVIN_CG_TOLERANCE/$cg_tolerance/g" ${workdir}/${name}.f90
-  sed -i "s/MERVIN_LBFGSB_STEPS/$lbfgsb_steps/g" ${workdir}/${name}.f90
-  sed -i "s/MERVIN_LBFGSB_TOLERANCE/$lbfgsb_tolerance/g" ${workdir}/${name}.f90
+  # set saddle search (TS or minima)
+  sed -i "s/MERVIN_SADDLE/$ts_search/g" ${workdir}/${name}.f90
   # set output coordinates
-  sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-mini/g" ${workdir}/${name}.f90
+  sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-loc/g" ${workdir}/${name}.f90
 
   ## Compile
-  ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}.f90
+  ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std --locate -f ${name}.f90
 
   ## Build the job
-  cp ${mervinmonroe}/${templates_subfolder}/mini/jobber  ${workdir}/${name}.job
-  sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.job
+  cp ${mervinmonroe}/${templates_subfolder}/locate/jobber  ${workdir}/${name}.job
+  sed -i "s/MERVIN_JOBNAME/${system}-${name}-${coord_file%.*}/g" ${workdir}/${name}.job
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.job

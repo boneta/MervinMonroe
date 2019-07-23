@@ -224,6 +224,9 @@
   sed -i "s/MERVIN_PRINT_CONSTR1/$print_constr1/g" ${workdir}/${name}.f90
   sed -i "s/MERVIN_PRINT_CONSTR2/$print_constr2/g" ${workdir}/${name}.f90
 
+  ## Compile
+  ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}.f90
+
   ## Build the jobber
   cp ${mervinmonroe}/${templates_subfolder}/pes/jobber  ${workdir}/${name}.jobber
   sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.jobber

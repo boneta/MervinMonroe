@@ -27,7 +27,7 @@
   export scripts_subfolder="bin"
   export templates_subfolder="templates"
 
-  export mervinmonroe_version="0.1.3 - 22072019"
+  export mervinmonroe_version="0.1.4 - 23072019"
 
 ##  SCRIPT  #########################################################
   ## Execute configuration file
@@ -55,14 +55,20 @@
     "import" )                   # system importer
       ${mervinmonroe}/${scripts_subfolder}/import.sh $@
       ;;
+    "compile" )                  # Dynamo compilation
+      ${mervinmonroe}/${scripts_subfolder}/compile.sh $@
+      ;;
     "minimizator"|"mini" )       # minimization
       ${mervinmonroe}/${scripts_subfolder}/minimizator.sh $@
+      ;;
+    "pel"|"scan" )               # PEL calculation launcher
+      ${mervinmonroe}/${scripts_subfolder}/pel.sh $@
       ;;
     "pes" )                      # PES calculation launcher
       ${mervinmonroe}/${scripts_subfolder}/pes.sh $@
       ;;
-    "pel" )                      # PEL calculation launcher
-      ${mervinmonroe}/${scripts_subfolder}/pel.sh $@
+    "locate" )                   # locator of minima and TS
+      ${mervinmonroe}/${scripts_subfolder}/locate.sh $@
       ;;
     "tools"|"t" )                # tools
       subtool=$1
@@ -84,14 +90,16 @@
       echo
       echo "Version $mervinmonroe_version"
       echo
-      echo "USAGE:   mervinmonroe [options]"
+      echo "USAGE:   mervinmonroe  <options>"
       echo
       echo "OPTIONS:                                     "
       echo " info                         information"
       echo " import                       system importer"
+      echo " compile                      Dynamo compilation"
       echo " minimizator | mini           minimizator"
+      echo " pel | scan                   PELine calculation"
       echo " pes                          PES calculation"
-      echo " pel                          PELine calculation"
+      echo " locate                       locate minima and TS"
       echo " tools | t                    tools (miscellaneous)"
       echo " -h | --help                  print this help and exit"
       echo
