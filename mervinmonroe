@@ -31,7 +31,7 @@
 
 ##  SCRIPT  #########################################################
   ## Execute configuration file
-    bash ${mervinmonroe}/.mervinconfig
+    source ${mervinmonroe}/.mervinconfig
 
   ## Check if the $mervinmonroe variable has been set
   if [ "$mervinmonroe" == "" ]; then

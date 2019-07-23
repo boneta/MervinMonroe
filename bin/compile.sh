@@ -15,8 +15,9 @@
 ##  DEFAULT VARIABLES  ##############################################
 
   locate_def="false"
+  dynamo_v_def="std"
   FC="gfortran"
-  Olevel="-O3"
+  Olevel="-O2"
 
 ##  SCRIPT  #########################################################
 
@@ -44,7 +45,6 @@
 
       "-l"|"--locate" )        # locate compilation
         locate="true"
-        exit
         ;;
 
       "-h"|"--help" )         # print help and exit
@@ -54,13 +54,13 @@
         echo "Version $mervinmonroe_version"
         echo
         echo
-        echo "··············       info       ···············"
+        echo "··············      compile     ···············"
         echo
-        echo "USAGE:   mervinmonroe info [options]"
+        echo "USAGE:   mervinmonroe compile [options]"
         echo
         echo "OPTIONS:                                     "
         echo " -f  <.f90>                       code to compile"
-        echo " -v | --version  <option>         Dynamo version to use"
+        echo " -v | --version  <option>         Dynamo version to use (default: $dynamo_v)"
         echo "                                    std          standard"
         echo "                                    gauss        with gaussian"
         echo " -l | --locate                    locate compilation (use 'panadero.f90')"
@@ -75,9 +75,10 @@
 
   ## Default variables if not input
   locate=${locate:=$locate_def}
+  dynamo_v=${dynamo_v:=$dynamo_v_def}
 
   ## Check for mandatory inputs
-  if [ ! -n "$dynamo_v" ]; then echo "ERROR: No Dynamo version specified"; exit; fi
+  # if [ ! -n "$dynamo_v" ]; then echo "ERROR: No Dynamo version specified"; exit; fi
   if [ ! -n "$code_file" ]; then echo "ERROR: No code file (.f90)"; exit; fi
 
   cd $workdir
@@ -89,7 +90,8 @@
         # compile 'panadero.f90'
         $FC -DF95 -I${dydir}/modules -w $Olevel -frecord-marker=4 -finit-local-zero \
           -J${mervinmonroe}/${templates_subfolder}/compile/ \
-          -c ${mervinmonroe}/${templates_subfolder}/compile/panadero.f90
+          -c ${mervinmonroe}/${templates_subfolder}/compile/panadero.f90 \
+          -o ${mervinmonroe}/${templates_subfolder}/compile/panadero.o
         # compile program
         $FC -DF95 -I${dydir}/modules -w $Olevel -frecord-marker=4 -finit-local-zero \
           -I${mervinmonroe}/${templates_subfolder}/compile/ \
