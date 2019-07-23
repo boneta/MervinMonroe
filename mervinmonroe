@@ -70,6 +70,9 @@
     "locate" )                   # locator of minima and TS
       ${mervinmonroe}/${scripts_subfolder}/locate.sh $@
       ;;
+    "irc" )                      # irc
+      ${mervinmonroe}/${scripts_subfolder}/irc.sh $@
+      ;;
     "tools"|"t" )                # tools
       subtool=$1
       shift
@@ -100,6 +103,7 @@
       echo " pel | scan                   PELine calculation"
       echo " pes                          PES calculation"
       echo " locate                       locate minima and TS"
+      echo " irc                          IRC calculation"
       echo " tools | t                    tools (miscellaneous)"
       echo " -h | --help                  print this help and exit"
       echo

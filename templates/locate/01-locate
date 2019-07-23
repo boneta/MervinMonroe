@@ -4,7 +4,7 @@ program locate
   use panadero
   implicit none
 
-  integer :: i, j
+  integer :: i, j, qm_charge
   logical, dimension(:), allocatable :: acs, flg
   real( kind=dp ), dimension(:), allocatable :: x
 

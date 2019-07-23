@@ -89,7 +89,7 @@
         echo "USAGE:   mervinmonroe locate [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the pel (def: $name_def)"
+        echo " --name              name of the location (def: $name_def)"
         echo " -s | --system       set the system previously defined"
         # echo " -f | --file         configuration file"
         echo " -c | --coord        intial coordinates file"
@@ -133,7 +133,13 @@
   # set saddle search (TS or minima)
   sed -i "s/MERVIN_SADDLE/$ts_search/g" ${workdir}/${name}.f90
   # set output coordinates
-  sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-loc/g" ${workdir}/${name}.f90
+  if [ "$ts_search" == ".true." ]; then
+    sed -i "s/MERVIN_COORD_OUT/${name}-ts/g" ${workdir}/${name}.f90
+    # sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-ts/g" ${workdir}/${name}.f90
+  else
+    sed -i "s/MERVIN_COORD_OUT/${name}-loc/g" ${workdir}/${name}.f90
+    # sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-loc/g" ${workdir}/${name}.f90
+  fi
 
   ## Compile
   ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std --locate -f ${name}.f90

@@ -1,0 +1,38 @@
+program irc
+  use dynamo
+  implicit none
+
+  integer                                      :: i, j, k, fd, it1, it2, qm_charge
+  integer                                      :: acs_n, acs_n3, acs_nh
+  logical, dimension(:), allocatable           :: acs, flg
+  logical                                      :: xlg
+  real( kind=dp )                              :: max_rms, cur_rms, tmp, g_nrm
+  real( kind=dp )                              :: lamb, l1, l2
+  integer, dimension(:), allocatable           :: acs_i
+  real( kind=dp ), dimension(:,:), allocatable :: evec
+  real( kind=dp ), dimension(:), allocatable   :: eval, x_cur, g_cur, vec, mw, x_ref, x_1st
+  type( dcd_type )                             :: dcd
+
+  integer, parameter :: it1_max = 200
+  integer, parameter :: it2_max = 1000
+
+  real( kind=dp ), parameter ::  large = 1000000._dp
+  real( kind=dp ), parameter :: minstp = 0.1_dp
+  real( kind=dp ), parameter ::    stp = 150._dp
+  real( kind=dp ), parameter ::  l_tol = 0.00000001_dp
+
+  real( kind=dp ), parameter :: dsp =  0.01_dp
+
+
+  real( kind=dp )            :: dir = MERVIN_IRC_DIRECTION
+
+
+  call dynamo_header
+
+  ! read binary file directly (faster)
+  call mm_system_read ( "MERVIN_BIN" )
+
+  ! read coordinates
+  call coordinates_read( "MERVIN_COORD_IN" )
+
+  allocate( acs(1:natoms), flg(1:natoms) )

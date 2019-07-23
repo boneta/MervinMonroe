@@ -98,7 +98,8 @@
           ${mervinmonroe}/${templates_subfolder}/compile/panadero.o \
           $code_file ${dydir}/DYNAMO.a
       else
-        $FC -DF95 -I${dydir}/modules -J${dydir}/modules -w $Olevel -frecord-marker=4 -finit-local-zero \
+        $FC -DF95 -I${dydir}/modules -I${mervinmonroe}/${templates_subfolder}/compile/ \
+          -J${dydir}/modules -w $Olevel -frecord-marker=4 -finit-local-zero \
           $code_file ${dydir}/DYNAMO.a
       fi
       ;;
