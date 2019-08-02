@@ -55,7 +55,7 @@
     "import" )                   # system importer
       ${mervinmonroe}/${scripts_subfolder}/import.sh $@
       ;;
-    "compile" )                  # Dynamo compilation
+    "compile"|"c" )                  # Dynamo compilation
       ${mervinmonroe}/${scripts_subfolder}/compile.sh $@
       ;;
     "minimizator"|"mini" )       # minimization
@@ -98,7 +98,7 @@
       echo "OPTIONS:                                     "
       echo " info                         information"
       echo " import                       system importer"
-      echo " compile                      Dynamo compilation"
+      echo " compile | c                  Dynamo compilation"
       echo " minimizator | mini           minimizator"
       echo " pel | scan                   PELine calculation"
       echo " pes                          PES calculation"

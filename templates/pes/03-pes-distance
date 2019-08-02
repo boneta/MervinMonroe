@@ -13,4 +13,4 @@
       call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A2 /) ) )
       call constraint_define( type = "DISTANCE", &
                               fc = MERVIN_FC._dp, &
-                              eq = r1, )
+                              eq = r1 )

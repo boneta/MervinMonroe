@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+import sys
+import math as m
+# import numpy as np
+# import scipy as sp
+
+## Transition State Theory Calculator ###############################
+# by Sergio Boneta
+
+# Based On:
+# Watney, J. B.; Soudackov, A. V.; Wong, K. F.; Hammes-Schiffer, S.
+# Calculation of the transition state theory rate constant for a general
+# reaction coordinate: Application to hydride transfer in an enzyme.
+# Chem. Phys. Lett. 2006, 418 (1–3), 268–271.
+# https://doi.org/10.1016/j.cplett.2005.10.129
+
+
+## CONSTANTS ########################################################
+# http://physics.nist.gov/cuu/Constants/index.html
+_c       = 299792458.             # m * s-1
+_NA      = 6.02214076e23          # mol-1
+_kb      = 1.380649e-23           # J * K-1
+_h       = 6.62607015e-34         # J * s
+
+_cal2J   = 4.1868                 # cal -> J
+_J2Kcal  = 0.0002388459           # J -> Kcal
+
+
+## TST Calculator ###################################################
+print "-- TST Calculator --"
+print ""
+
+# calculate free energy (dG) from rate constant
+if sys.argv[1] == 'G' :
+    temp = float(input("Temperature (K): "))
+    rate = float(input("Rate constant (s-1): "))
+    beta = 1/( _kb*_J2Kcal * temp )
+    G = m.log( rate * beta * _h*_J2Kcal ) / -beta * _NA
+    print ""
+    print "Free Energy Barrier (Kcal/mol):"
+    print G
+
+# calculate rate constant from free energy (dG)
+elif sys.argv[1] == 'k' :
+    temp = float(input("Temperature (K): "))
+    G = float(input("G (kcal/mol): "))
+    beta = 1/( _kb*_J2Kcal * temp )
+    rate = m.exp( G * -beta / _NA ) / ( beta * _h*_J2Kcal )
+    print ""
+    print "Rate Constant (s-1):"
+    print rate
+
+else :
+    print "Argument needed: 'G' or 'k'"
