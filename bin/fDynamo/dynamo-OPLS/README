@@ -1,0 +1,27 @@
+Original fDynamo files have been renamed to *.orig
+
+edit the makefiles to fulfill your system
+
+default compiler is Intel Fortran Compiler (C + Fortran), but this can be changed.
+(gfortran 4.1 complains, so update to a higher version...)
+
+
+in order to compile your source code type:
+
+make -f PATH/makefile.gnu SRC=source.f90
+
+being PATH current directory (you should also had modified makefile.gnu
+HOME variable in order to work properly)
+
+
+Note of caution for moving binary files among systems:
+
+"GFortran 4.2 and 4.3 use now 4-byte record markers by default for
+unformatted files to be compatible with g77 and most other compilers.
+The implementation allows for records bigger than 2 GB, compatible with
+several other compilers. Older versions of GFortran used by default
+8-byte record markers (on most systems); in order to change length of
+record markers, e.g. to the read unformatted files created by older
+gfortran versions, the -frecord-marker=8 option can be used."
+
+Thus when moving from Intel compilres to GFortran 4.1 use -frecord-marker=4
