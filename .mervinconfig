@@ -24,15 +24,15 @@ if [ "true" == "true" ]; then
   chmod +x mervinmonroe
   chmod +x -R bin/
   # Compile dynamo
-  echo "COMPILE: dynamo-OPLS"
+  echo "########  COMPILE: dynamo-OPLS"
   cd ${dynamo_std}
   if [[ ! -d "modules" ]]; then
     mkdir modules
   fi
   cd src
   make -f makefile.gnu
-  echo "COMPILE: dynamo-gaussian"
-  cd ${dynamo_gauss}
+  echo "########  COMPILE: dynamo-gaussian"
+  cd ${dynamo_gauss}/src
   make -f makefile
   cd $origin_dir
 fi
