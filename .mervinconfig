@@ -12,18 +12,27 @@
 
 # Execute only once (the first time)
 if [ "true" == "true" ]; then
+  origin_dir=`pwd`
   cd $mervinmonroe
-  # Give execution permissions
-  chmod +x mervinmonroe
-  chmod +x -R bin/
-  # Compile dynamo
-  make -f ${dynamo_std}/src/makefile.gnu
-  make -f ${dynamo_gauss}/src/makefile
+  # Modify '.mervinconfig' to be executed only once
+  sed -i "s/true/false/" ${mervinmonroe}/.mervinconfig
   # Create systems folder
   if [[ ! -d "systems" ]]; then
     mkdir systems
   fi
-  # Modify '.mervinconfig' to be executed only once
-  sed -i "s/true/false/" ${mervinmonroe}/.mervinconfig
-  cd -
+  # Give execution permissions
+  chmod +x mervinmonroe
+  chmod +x -R bin/
+  # Compile dynamo
+  echo "COMPILE: dynamo-OPLS"
+  cd ${dynamo_std}
+  if [[ ! -d "modules" ]]; then
+    mkdir modules
+  fi
+  cd src
+  make -f makefile.gnu
+  echo "COMPILE: dynamo-gaussian"
+  cd ${dynamo_gauss}
+  make -f makefile
+  cd $origin_dir
 fi
