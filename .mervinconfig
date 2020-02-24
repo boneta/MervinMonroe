@@ -2,8 +2,8 @@
 
 ##  USER VARIABLES  #################################################
 
-  export dynamo_std="/home/"
-  export dynamo_gauss="/home/"
+  export dynamo_std="${mervinmonroe}/bin/fDynamo/dynamo-OPLS"
+  export dynamo_gauss="${mervinmonroe}/bin/fDynamo/dynamo-gaussian"
 
 
 
@@ -11,14 +11,19 @@
 
 
 # Execute only once (the first time)
-
 if [ "true" == "true" ]; then
   cd $mervinmonroe
+  # Give execution permissions
   chmod +x mervinmonroe
   chmod +x -R bin/
-  sed -i "s/true/false/" ${mervinmonroe}/.mervinconfig
+  # Compile dynamo
+  make -f ${dynamo_std}/src/makefile.gnu
+  make -f ${dynamo_gauss}/src/makefile
+  # Create systems folder
   if [[ ! -d "systems" ]]; then
     mkdir systems
   fi
+  # Modify '.mervinconfig' to be executed only once
+  sed -i "s/true/false/" ${mervinmonroe}/.mervinconfig
   cd -
 fi

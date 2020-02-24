@@ -60,7 +60,7 @@
         echo
         echo "OPTIONS:                                     "
         echo " -f  <.f90>                       code to compile"
-        echo " -v | --version  <option>         Dynamo version to use (default: $dynamo_v)"
+        echo " -v | --version  <option>         Dynamo version to use (default: $dynamo_v_def)"
         echo "                                    std          standard"
         echo "                                    gauss        with gaussian"
         echo " -l | --locate                    locate compilation (use 'panadero.f90')"
