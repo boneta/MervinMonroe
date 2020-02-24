@@ -216,7 +216,9 @@
   deallocate( eval, evec )
   deallocate( x_cur, g_cur, vec, mw, x_ref )
   deallocate( acs, flg )
-!  call dynamo_footer
+
+  call dynamo_footer
+
 end
 include 'mep_project.f90'
 include "nofix.f90"

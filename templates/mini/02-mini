@@ -47,6 +47,8 @@
 
   deallocate( acs )
 
+  call dynamo_footer
+
 end
 
 include 'nofix.f90'
