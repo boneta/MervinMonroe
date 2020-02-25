@@ -52,10 +52,20 @@
     "info" )                     # information
       ${mervinmonroe}/${scripts_subfolder}/info.sh $@
       ;;
+    "update" )                   # update Mervin Monroe
+      cd $mervinmonroe
+      git fetch --all
+      git reset --hard origin/master
+      if [ "$?" == 0 ]; then
+        echo "Mervin Monroe updated succesfully!"
+      fi
+      bash .mervinconfig
+      cd - 2>&1 /dev/null
+      ;;
     "import" )                   # system importer
       ${mervinmonroe}/${scripts_subfolder}/import.sh $@
       ;;
-    "compile"|"c" )                  # Dynamo compilation
+    "compile"|"c" )              # Dynamo compilation
       ${mervinmonroe}/${scripts_subfolder}/compile.sh $@
       ;;
     "minimizator"|"mini" )       # minimization
@@ -97,6 +107,7 @@
       echo
       echo "OPTIONS:                                     "
       echo " info                         information"
+      echo " update                       update Mervin Monroe"
       echo " import                       system importer"
       echo " compile | c                  Dynamo compilation"
       echo " minimizator | mini           minimizator"
