@@ -12,6 +12,7 @@ mervinmonroe [options]
 ### Subprograms
 
   * info
+  * update
   * import
   * compile
   * minimizator

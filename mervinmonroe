@@ -53,14 +53,20 @@
       ${mervinmonroe}/${scripts_subfolder}/info.sh $@
       ;;
     "update" )                   # update Mervin Monroe
-      cd $mervinmonroe
-      git fetch --all
-      git reset --hard origin/master
-      if [ "$?" == 0 ]; then
-        echo "Mervin Monroe updated succesfully!"
+      read -p "Update Mervin Monroe software? (y/n): " update_response
+      if [ "$update_response" == "y" ] || [ "$update_response" == "yes" ]; then
+        cd $mervinmonroe
+        git fetch --all
+        git reset --hard origin/master
+        if [ "$?" == 0 ]; then
+          echo "## Mervin Monroe updated from GitHub succesfully!"
+        fi
+        bash .mervinconfig
+        cd - 2>&1 /dev/null
+      else
+        echo "Update cancelled. Exiting."
+        exit
       fi
-      bash .mervinconfig
-      cd - 2>&1 /dev/null
       ;;
     "import" )                   # system importer
       ${mervinmonroe}/${scripts_subfolder}/import.sh $@
