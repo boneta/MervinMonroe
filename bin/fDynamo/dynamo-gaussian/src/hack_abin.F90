@@ -49,7 +49,7 @@ SUBROUTINE ABINITIO_NON_BONDED( SELECTION )
 !    END DO NBLOOP
 
 	! - trunctaion scheme (take a big one in order to avoid problems... ideally all the mobile atoms)
-	CALL SELE_QMNB( SELECTION )
+	CALL MY_SELE( SELECTION )
 
     ! - skip ALL QM-atoms (MM-Link included) from the interaction...
 !	WHERE( ATMQMI > 0 ) SELECTION = .FALSE.
