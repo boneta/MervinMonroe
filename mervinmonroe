@@ -27,7 +27,7 @@
   export scripts_subfolder="bin"
   export templates_subfolder="templates"
 
-  export mervinmonroe_version="0.1.5 - 24022020"
+  export mervinmonroe_version="0.1.6 - 25022020"
 
 ##  SCRIPT  #########################################################
   ## Execute configuration file
@@ -60,6 +60,10 @@
         git reset --hard origin/master
         if [ "$?" == 0 ]; then
           echo "## Mervin Monroe updated from GitHub succesfully!"
+        else
+          echo "ERROR: Something went wrong while updating from GitHub."
+          cd - 2>&1 /dev/null
+          exit
         fi
         bash .mervinconfig
         cd - 2>&1 /dev/null
