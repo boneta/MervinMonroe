@@ -15,12 +15,13 @@ mervinmonroe [options]
   * update
   * import
   * compile
-  * minimizator
+  * minimization
   * pel / scan
   * pes
   * locate
   * irc
   * pmf
+  * correction
   * tools
 
 ### Configuration

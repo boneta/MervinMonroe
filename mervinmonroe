@@ -78,8 +78,8 @@
     "compile"|"c" )              # Dynamo compilation
       ${mervinmonroe}/${scripts_subfolder}/compile.sh $@
       ;;
-    "minimizator"|"mini" )       # minimization
-      ${mervinmonroe}/${scripts_subfolder}/minimizator.sh $@
+    "minimization"|"mini" )      # minimization
+      ${mervinmonroe}/${scripts_subfolder}/minimization.sh $@
       ;;
     "pel"|"scan" )               # PEL calculation launcher
       ${mervinmonroe}/${scripts_subfolder}/pel.sh $@
@@ -95,6 +95,9 @@
       ;;
     "pmf" )                      # pmf
       ${mervinmonroe}/${scripts_subfolder}/pmf.sh $@
+      ;;
+    "correction"|"corr" )        # correction
+      ${mervinmonroe}/${scripts_subfolder}/correction.sh $@
       ;;
     "tools"|"t" )                # tools
       subtool=$1
@@ -123,12 +126,13 @@
       echo " update                       update Mervin Monroe"
       echo " import                       system importer"
       echo " compile | c                  Dynamo compilation"
-      echo " minimizator | mini           minimizator"
+      echo " minimization | mini          minimization"
       echo " pel | scan                   PELine calculation"
       echo " pes                          PES calculation"
       echo " locate                       locate minima and TS"
       echo " irc                          IRC calculation"
       echo " pmf                          PMF calculation"
+      echo " correction | corr            correction calculation"
       echo " tools | t                    tools (miscellaneous)"
       echo " -h | --help                  print this help and exit"
       echo

@@ -1,0 +1,25 @@
+
+  call cabinitio_setup( acs )
+
+  flg = .false.
+  call my_sele( flg )
+  call atoms_fix( .not. flg )
+  flg = flg .and. .not. acs
+
+  call energy_initialize
+  call energy_non_bonding_options ( &
+    list_cutoff   = 18.0_dp, &
+    outer_cutoff  = 16.0_dp, &
+    inner_cutoff  = 14.5_dp, &
+    minimum_image = .false. )
+  skip_cabinitio = .false.
+  call energy
+
+  deallocate( flg, acs )
+  call cabinitio_exit
+  
+  call dynamo_footer
+
+end
+include "nofix.f90"
+include "with_gaussian.f90"

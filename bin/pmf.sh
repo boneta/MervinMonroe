@@ -237,4 +237,3 @@
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_I/${i_val}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_J/${j_val}/g" ${workdir}/${name}.jobber
-  sed -i "s/MERVIN_COORD/${coord_file}/g" ${workdir}/${name}.jobber

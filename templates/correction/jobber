@@ -1,0 +1,65 @@
+#!/bin/bash
+
+## SGE
+#$ -q BIFIZCAM
+#$ -N MERVIN_JOBNAME
+#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -R yes
+
+## SLURM
+#SBATCH -J MERVIN_JOBNAME
+#SBATCH -o /home/boneta/msg/MERVIN_JOBNAME.msg
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH -p bifi
+
+workdir="MERVIN_WORKDIR"
+i_side=MERVIN_I
+j_side=MERVIN_J
+
+cd $workdir
+
+## launch
+for i in `seq -w 0 $i_side`; do
+  for j in `seq -w 0 $j_side`; do
+
+    filename="sp.${i}.${j}"
+
+    jobfile="${filename}.job"
+    inputfile="${filename}.inp"
+    logfile="${filename}.log"
+
+    mkdir $filename
+    cd $filename
+    ln -s ../BPET.bin BPET.bin
+    ln -s ../nofix.f90 nofix.f90
+    ln -s ../with_gaussian.f90 with_gaussian.f90
+    ln -s ../MERVIN_CRD_CHARGE/pes.${i}.${j}.crd pes.${i}.${j}.crd
+
+    echo "#!/bin/bash "                                  > ${jobfile}
+    echo ""                                              >> ${jobfile}
+    echo "#$ -q BIFIZCAM "                               >> ${jobfile}
+    echo "#$ -N $filename "                              >> ${jobfile}
+    echo "#$ -e /home/boneta/msg/${filename}.msg "       >> ${jobfile}
+    echo "#$ -R yes "                                    >> ${jobfile}
+    echo "#$ -pe mp8 8 "                                 >> ${jobfile}
+    echo "#$ -l h='!node009.cm.cluster' "                >> ${jobfile}
+    echo ""                                              >> ${jobfile}
+    echo "#SBATCH -J $filename "                         >> ${jobfile}
+    echo "#SBATCH -o /home/boneta/msg/${filename}.msg "  >> ${jobfile}
+    echo "#SBATCH -N 1 "                                 >> ${jobfile}
+    echo "#SBATCH --ntasks-per-node=8 "                  >> ${jobfile}
+    echo "#SBATCH -p bifi "                              >> ${jobfile}
+    echo ""                                              >> ${jobfile}
+    echo "cd $workdir/$filename"                         >> ${jobfile}
+    echo "echo \"${i} ${j}\" > ${inputfile}"             >> ${jobfile}
+    echo "../a.out < ${inputfile} > ${logfile}"          >> ${jobfile}
+    echo "rm ${inputfile}"                               >> ${jobfile}
+
+    qsub ${jobfile}
+    sbatch ${jobfile}
+    sleep 1
+    cd -
+
+  done
+done

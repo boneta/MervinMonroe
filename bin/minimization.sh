@@ -3,13 +3,13 @@
 #################################################
 ###               MERVIN MONROE               ###
 #################################################
-#                  minimizator                  #
+#                 minimization                  #
 #################################################
 
 #                by Sergio Boneta
 
 
-## USAGE:   mervinmonroe minimizator [options]
+## USAGE:   mervinmonroe minimization [options]
 
 
 ##  DEFAULT VARIABLES  ##############################################
@@ -99,9 +99,9 @@
         echo "Version $mervinmonroe_version"
         echo
         echo
-        echo "··············   minimizator   ················"
+        echo "··············   minimization   ···············"
         echo
-        echo "USAGE:   mervinmonroe minimizator [options]"
+        echo "USAGE:   mervinmonroe minimization [options]"
         echo
         echo "OPTIONS:                                     "
         echo " --name  <name>                        name of the minimization (def: $name_def)"
