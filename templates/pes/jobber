@@ -60,6 +60,7 @@ for i in `seq -w 0 ${i_side}`; do
   echo "#$ -N $filename "                              >> ${jobfile}
   echo "#$ -e /home/boneta/msg/${filename}.msg "       >> ${jobfile}
   echo "#$ -R yes "                                    >> ${jobfile}
+  echo "#$ -l h='!node009.cm.cluster' "                >> ${jobfile}
   echo ""                                              >> ${jobfile}
   echo "#SBATCH -J $filename "                         >> ${jobfile}
   echo "#SBATCH -o /home/boneta/msg/${filename}.msg "  >> ${jobfile}

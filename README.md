@@ -20,6 +20,7 @@ mervinmonroe [options]
   * pes
   * locate
   * irc
+  * pmf
   * tools
 
 ### Configuration

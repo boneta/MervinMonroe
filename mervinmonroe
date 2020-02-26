@@ -93,6 +93,9 @@
     "irc" )                      # irc
       ${mervinmonroe}/${scripts_subfolder}/irc.sh $@
       ;;
+    "pmf" )                      # pmf
+      ${mervinmonroe}/${scripts_subfolder}/pmf.sh $@
+      ;;
     "tools"|"t" )                # tools
       subtool=$1
       shift
@@ -125,6 +128,7 @@
       echo " pes                          PES calculation"
       echo " locate                       locate minima and TS"
       echo " irc                          IRC calculation"
+      echo " pmf                          PMF calculation"
       echo " tools | t                    tools (miscellaneous)"
       echo " -h | --help                  print this help and exit"
       echo

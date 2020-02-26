@@ -1,0 +1,57 @@
+#!/bin/bash
+
+## SGE
+#$ -q BIFIZCAM
+#$ -N MERVIN_JOBNAME
+#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -R yes
+
+## SLURM
+#SBATCH -J MERVIN_JOBNAME
+#SBATCH -o /home/boneta/msg/MERVIN_JOBNAME.msg
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH -p bifi
+
+
+workdir="MERVIN_WORKDIR"
+i_side=MERVIN_I
+j_side=MERVIN_J
+
+cd $workdir
+
+## launch PMF
+for i in `seq -w 0 ${i_side}`; do
+  for j in `seq -w 0 ${j_side}`; do
+
+    filename="pmf.${i}.${j}"
+
+    jobfile="${filename}.job"
+    inputfile="${filename}.inp"
+    logfile="${filename}.log"
+
+    echo "#!/bin/bash "                                  > ${jobfile}
+    echo ""                                              >> ${jobfile}
+    echo "#$ -q BIFIZCAM "                               >> ${jobfile}
+    echo "#$ -N $filename "                              >> ${jobfile}
+    echo "#$ -e /home/boneta/msg/${filename}.msg "       >> ${jobfile}
+    echo "#$ -R yes "                                    >> ${jobfile}
+    echo "#$ -l h='!node009.cm.cluster' "                >> ${jobfile}
+    echo ""                                              >> ${jobfile}
+    echo "#SBATCH -J $filename "                         >> ${jobfile}
+    echo "#SBATCH -o /home/boneta/msg/${filename}.msg "  >> ${jobfile}
+    echo "#SBATCH -N 1 "                                 >> ${jobfile}
+    echo "#SBATCH --ntasks-per-node=1 "                  >> ${jobfile}
+    echo "#SBATCH -p bifi "                              >> ${jobfile}
+    echo ""                                              >> ${jobfile}
+    echo "cd $workdir"                                   >> ${jobfile}
+    echo "echo \"${i} ${j}\" > ${inputfile}"             >> ${jobfile}
+    echo "./a.out < ${inputfile} > ${logfile}"           >> ${jobfile}
+    echo "rm ${inputfile} borra_${i}.${j}"               >> ${jobfile}
+
+    qsub ${jobfile}
+    sbatch ${jobfile}
+    sleep 1
+
+  done
+done
