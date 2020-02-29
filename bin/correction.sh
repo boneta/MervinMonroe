@@ -162,4 +162,5 @@
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_I/${i_val}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_J/${j_val}/g" ${workdir}/${name}.jobber
+  sed -i "s/MERVIN_BIN/`ls *.bin`/g" ${workdir}/${name}.jobber
   sed -i "s|MERVIN_CRD_FOLDER|${coord_folder}|g" ${workdir}/${name}.jobber

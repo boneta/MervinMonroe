@@ -39,14 +39,14 @@
           echo "ERROR: System not recognized"
           exit
         fi
-        echo "SYSTEM: '$system'"
-        ls -lh $system_dir
+        echo "##  SYSTEM: '$system'  #########"
+        ls $system_dir | cat
         echo
         exit
         ;;
 
-      "--sys-avail" )         # list systems imported
-        ls -lh ${mervinmonroe}/${systems_subfolder}
+      "--sys-avail"|"-a" )    # list systems imported
+        ls ${mervinmonroe}/${systems_subfolder} | cat
         exit
         ;;
 
@@ -84,7 +84,7 @@
         echo
         echo "OPTIONS:                                     "
         echo " -s | --system  <system>          show files of the specified system"
-        echo " --sys-avail                      list imported systems"
+        echo " --sys-avail | -a                 list imported systems"
         echo " --template  <template name>      print a template sample:"
         echo "                                    qm-atoms.f90    selection of atoms for the qm part"
         echo "                                    pes             PES configuration file"
