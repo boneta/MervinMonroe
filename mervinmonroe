@@ -62,11 +62,11 @@
           echo "## Mervin Monroe updated from GitHub succesfully!"
         else
           echo "ERROR: Something went wrong while updating from GitHub."
-          cd - /dev/null 2>&1
+          cd - > /dev/null 2>&1
           exit
         fi
         bash .mervinconfig
-        cd - /dev/null 2>&1
+        cd - > /dev/null 2>&1
       else
         echo "Update cancelled. Exiting."
         exit

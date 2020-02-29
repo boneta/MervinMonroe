@@ -157,7 +157,7 @@
   ${mervinmonroe}/${scripts_subfolder}/compile.sh --version gauss -f ${name}.f90
 
   ## Build the jobber
-  cp ${mervinmonroe}/${templates_subfolder}/pmf/jobber  ${workdir}/${name}.jobber
+  cp ${mervinmonroe}/${templates_subfolder}/correction/jobber  ${workdir}/${name}.jobber
   sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.jobber
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_I/${i_val}/g" ${workdir}/${name}.jobber
