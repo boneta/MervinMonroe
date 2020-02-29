@@ -17,9 +17,9 @@
 
   deallocate( flg, acs )
   call cabinitio_exit
-  
+
   call dynamo_footer
 
 end
-include "nofix.f90"
-include "with_gaussian.f90"
+include "../nofix.f90"
+include "../with_gaussian.f90"

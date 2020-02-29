@@ -31,10 +31,10 @@ for i in `seq -w 0 $i_side`; do
 
     mkdir $filename
     cd $filename
-    ln -s ../MERVIN_BIN MERVIN_BIN
-    ln -s ../nofix.f90 nofix.f90
-    ln -s ../with_gaussian.f90 with_gaussian.f90
-    ln -s ../MERVIN_CRD_FOLDER/pes.${i}.${j}.crd pes.${i}.${j}.crd
+    # ln -s ../MERVIN_BIN MERVIN_BIN
+    # ln -s ../nofix.f90 nofix.f90
+    # ln -s ../with_gaussian.f90 with_gaussian.f90
+    # ln -s ../MERVIN_CRD_FOLDER/pes.${i}.${j}.crd pes.${i}.${j}.crd
 
     echo "#!/bin/bash "                                  > ${jobfile}
     echo ""                                              >> ${jobfile}
