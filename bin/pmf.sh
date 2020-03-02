@@ -181,7 +181,7 @@
     echo "#SBATCH -p bifi "                              >> ${name}-wham.job
     echo ""                                              >> ${name}-wham.job
     echo "cd $workdir"                                   >> ${name}-wham.job
-    echo "python2 ${mervinmonroe}/${scripts_subfolder}/tools/wham-2D --name $name --path ../ --temp $temperature --conv 0.001 --time production_ps --ij $i_val $j_val" >> ${name}-wham.job
+    echo "python2 ${mervinmonroe}/${scripts_subfolder}/tools/wham-2D --name $name --path ../ --temp $temperature --conv 0.001 --time $production_ps --ij $i_val $j_val" >> ${name}-wham.job
     echo "cd .."                                         >> ${name}-wham.job
     cd ..
     exit
