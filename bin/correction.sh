@@ -80,6 +80,47 @@
       #   shift
       #   ;;
 
+      "--check" )            # check correction
+        last_sp=`ls -d sp.* | tail -1`
+        i_val=`echo $last_sp | awk -F "." '{print $2}'`
+        j_val=`echo $last_sp | awk -F "." '{print $3}'`
+
+        all=0
+
+        # echo "## Not finished:"
+        for i in `seq -w 0 $i_val`; do
+          for j in `seq -w 0 $j_val`; do
+            if [ "`grep "^Potential Energy" sp.${i}.${j}/sp.${i}.${j}.log | awk '{print $4}'`" == "" ]; then
+              all=$((all + 1))
+              echo " ${i} ${j}"
+            fi
+          done
+        done
+        if [ "$all" == 0 ]; then
+          echo "All corrections finished!"
+        fi
+        exit
+        ;;
+
+      "--relaunch" )           # re-launch unfinished jobs
+        last_sp=`ls -d sp.* | tail -1`
+        i_val=`echo $last_sp | awk -F "." '{print $2}'`
+        j_val=`echo $last_sp | awk -F "." '{print $3}'`
+
+        for i in `seq -w 0 $i_val`; do
+          for j in `seq -w 0 $j_val`; do
+            if [ "`grep "^Potential Energy" sp.${i}.${j}/sp.${i}.${j}.log | awk '{print $4}'`" == "" ]; then
+              qsub sp.${i}.${j}/sp.${i}.${j}.job
+            fi
+          done
+        done
+        exit
+        ;;
+
+      "--process" )           # process ended correction
+        process=1
+        ;;
+
       "-j" )                 # .job only
         job_only=1
         ;;
@@ -102,6 +143,9 @@
         echo " -c | --coord        coordinates folder"
         echo " --functional        DFT functional (def: $functional_def)"
         echo " --basis             basis set (def: $basis_def)"
+        echo " --check             display not finished jobs"
+        echo " --relaunch          launch not finished jobs"
+        echo " --process           process ended correction"
         # echo " --charge            QM charge (def: $qm_charge_def)"
         echo " -j                  job only (creates files but do not launch)"
         echo " -h | --help         print this help and exit"
@@ -119,6 +163,23 @@
   basis=${basis:=$basis_def}
   # qm_charge=${qm_charge:=$qm_charge_def}
   job_only=${job_only:=0}
+
+  ## Process (if requested)
+  if [ "$process" == 1 ]; then
+    last_sp=`ls -d sp.* | tail -1`
+    i_val=`echo $last_sp | awk -F "." '{print $2}'`
+    j_val=`echo $last_sp | awk -F "." '{print $3}'`
+
+    rm -f ${name}-${functional}.dat
+
+    for i in `seq -w 0 $i_val`; do
+      for j in `seq -w 0 $j_val`; do
+        echo -n " ${i}  ${j}    " >> ${name}-${functional}.dat
+        grep "^Potential Energy" sp.${i}.${j}/sp.${i}.${j}.log | awk '{print $4}' >> ${name}-${functional}.dat
+      done
+    done
+    exit
+  fi
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
