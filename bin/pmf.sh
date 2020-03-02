@@ -180,8 +180,10 @@
     echo "#SBATCH --ntasks-per-node=8 "                  >> ${name}-wham.job
     echo "#SBATCH -p bifi "                              >> ${name}-wham.job
     echo ""                                              >> ${name}-wham.job
-    echo "cd $workdir"                                   >> ${name}-wham.job
-    echo "python2 ${mervinmonroe}/${scripts_subfolder}/tools/wham-2D --name $name --path ../ --temp $temperature --conv 0.001 --time $production_ps --ij $i_val $j_val" >> ${name}-wham.job
+    echo "cd $workdir/wham"                              >> ${name}-wham.job
+    echo "python2 ${mervinmonroe}/${scripts_subfolder}/tools/wham-2D \\" >> ${name}-wham.job
+    echo " --name $name --path ../ --temp $temperature --conv 0.001 \\"  >> ${name}-wham.job
+    echo " --time $production_ps --ij $i_val $j_val"     >> ${name}-wham.job
     echo "cd .."                                         >> ${name}-wham.job
     cd ..
     exit
