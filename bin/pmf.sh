@@ -86,6 +86,10 @@
         exit
         ;;
 
+      "--wham" )             # whamize
+        wham=1
+        ;;
+
       "-j" )                 # .job only
         job_only=1
         ;;
@@ -108,6 +112,7 @@
         echo " -c | --coord        coordinates folder"
         echo " --method            QM method (def: $qm_method_def)"
         echo " --check             check PMF progress"
+        echo " --wham              integrate with WHAM"
         # echo " --charge            QM charge (def: $qm_charge_def)"
         # echo " -t | --temperature  temperature bath (def: )"
         echo " -j                  job only (creates files but do not launch)"
@@ -128,9 +133,11 @@
   job_only=${job_only:=0}
 
   ## Check for mandatory inputs
-  if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
   if [ ! -n "$pmf_file" ]; then echo "ERROR: No configuration file set"; exit; fi
-  if [ ! -n "$coord_folder" ]; then echo "ERROR: No coordinates folder set"; exit; fi
+  if [ "$wham" != 1  ]; then
+    if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
+    if [ ! -n "$coord_folder" ]; then echo "ERROR: No coordinates folder set"; exit; fi
+  fi
 
   ## Read config pmf file
   # remove comments (lines starting with #)
@@ -153,6 +160,32 @@
   temperature=${md_options[0]}
   equilibration_ps=${md_options[1]}
   production_ps=${md_options[2]}
+
+  ## wham (if requested)
+  if [ "$wham" == 1 ]; then
+    mkdir wham
+    cd wham
+    echo "#!/bin/bash "                                  > ${name}-wham.job
+    echo ""                                              >> ${name}-wham.job
+    echo "#$ -q BIFIZCAM "                               >> ${name}-wham.job
+    echo "#$ -N $name-wham "                             >> ${name}-wham.job
+    echo "#$ -e /home/boneta/msg/$name-wham.msg "        >> ${name}-wham.job
+    echo "#$ -R yes "                                    >> ${name}-wham.job
+    echo "#$ -pe mp8 8 "                                 >> ${name}-wham.job
+    echo "#$ -l h='!node009.cm.cluster' "                >> ${name}-wham.job
+    echo ""                                              >> ${name}-wham.job
+    echo "#SBATCH -J $name-wham "                        >> ${name}-wham.job
+    echo "#SBATCH -o /home/boneta/msg/$name-wham.msg "   >> ${name}-wham.job
+    echo "#SBATCH -N 1 "                                 >> ${name}-wham.job
+    echo "#SBATCH --ntasks-per-node=8 "                  >> ${name}-wham.job
+    echo "#SBATCH -p bifi "                              >> ${name}-wham.job
+    echo ""                                              >> ${name}-wham.job
+    echo "cd $workdir"                                   >> ${name}-wham.job
+    echo "python2 ${mervinmonroe}/${scripts_subfolder}/tools/wham-2D --name $name --path ../ --temp $temperature --conv 0.001 --time production_ps --ij $i_val $j_val" >> ${name}-wham.job
+    echo "cd .."                                         >> ${name}-wham.job
+    cd ..
+    exit
+  fi
 
   ## Build the f90 file
   # copy system files

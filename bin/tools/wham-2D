@@ -1,0 +1,249 @@
+#!/usr/bin/python2
+
+import numpy as np
+import string
+import os
+import re
+import sys
+import argparse
+
+# Parser
+my_parser = argparse.ArgumentParser(prog='wham-2D',
+                                    description='WHAM integration of PMF calculations (2D)')
+my_parser.add_argument('--name',
+                       type=str,
+                       help='PMF name',
+                       default='pmf')
+my_parser.add_argument('--path',
+                       type=str,
+                       help='dat_* files path',
+                       default='../')
+my_parser.add_argument('--temp',
+                       type=float,
+                       help='temperature (def: 313.)',
+                       default=313.)
+my_parser.add_argument('--conv',
+                       type=float,
+                       help='wham convergence (def: 0.001)',
+                       default=0.001)
+my_parser.add_argument('--ij',
+                       metavar=('i','j'),
+                       required=True,
+                       type=int,
+                       help='i j',
+                       nargs=2)
+my_parser.add_argument('--time',
+                       required=True,
+                       type=int,
+                       help='production time (ps)')
+args = my_parser.parse_args()
+
+outname = args.name
+dir   = args.path
+temperature = args.temp
+wham_conv = args.conv
+i_val = args.ij[0]
+j_val = args.ij[1]
+
+equilibration = 1
+acquisition = args.time*1000 + 1 
+
+name1 = 'dat_x'
+name2 = 'dat_y'
+
+#kB = 0.00198587724841  # in kcal/mol
+kB = 8.31447086363e-3  # in kJ/mol
+
+inf = 1.e30
+
+#######################################################################
+##  MAIN                                                            ###
+#######################################################################
+def main():
+
+    coor1 = re.compile(name1 + '.*' )
+    coor2 = re.compile(name2 + '.*' )
+
+    files = os.listdir(dir)
+    coor1 = filter(lambda f, c=coor1: c.match(f) is not None, files)
+    coor2 = filter(lambda f, c=coor2: c.match(f) is not None, files)
+
+    coor1.sort()
+    coor2.sort()
+
+    windows = []
+    for files in map(None, coor1, coor2):
+        rc0 = []
+        fc = []
+        rc = []
+        for fn in files:
+            print fn
+            data = open(os.path.join(dir, fn)).readlines()
+            [fcs, rc0s] = string.split( data[0] )
+            rc0.append(string.atof(string.strip(rc0s)))
+            fc.append(0.5*string.atof(string.strip(fcs)))
+            rc1 = []
+            for line in data[equilibration:equilibration+acquisition]:
+                rc1.append(string.atof(string.strip(line)))
+            rc.append(rc1)
+        print len(rc)
+        windows.append((np.array(rc0), np.array(fc), np.transpose(np.array(rc))))
+
+
+    def combine(window_list):
+        new = []
+        for w in window_list:
+            done = 0
+            for i in range(len(new)):
+                if np.logical_and.reduce(np.equal(new[i][0], w[0])) and \
+                   np.logical_and.reduce(np.equal(new[i][1], w[1])):
+                    new[i] = (new[i][0], new[i][1], np.concatenate((new[i][2],w[2])))
+                    done = 1
+                    break
+            if not done:
+                new.append(w)
+        return new
+
+    min1 = inf
+    min2 = inf
+    max1 = -inf
+    max2 = -inf
+    for rc, fc, data in windows:
+        for point in data:
+            min1 = min(min1, point[0])
+            max1 = max(max1, point[0])
+            min2 = min(min2, point[1])
+            max2 = max(max2, point[1])
+
+    print windows[1]
+    windows = combine(windows)
+    print len(windows)
+
+    sys.stdout.flush()
+
+    c1_bins = (min1, max1, (i_val+1)*2)
+    c2_bins = (min2, max2, (j_val+1)*2)
+    axes, rho, pmf = wham(windows, (c1_bins, c2_bins), temperature, wham_conv)
+
+    big = np.equal(pmf, inf)
+    pmf_min = np.minimum.reduce(np.ravel(pmf))
+    pmf_out = np.choose(big, (pmf-pmf_min, 0))
+    pmf_max = np.maximum.reduce(np.ravel(pmf))
+
+    def writeArray( array, filename ):
+        fd = open( filename, "wt" )
+        if len(array.shape) == 1:
+            array = array[:, np.newaxis]
+        for line in array:
+            for element in line:
+                fd.write(`element` + ' ')
+            fd.write('\n')
+        fd.close()
+
+    # Write classic output
+    writeArray(pmf_out, outname + '.dat')
+    writeArray(axes[0], 'axes0_' + outname + '.dat')
+    writeArray(axes[1], 'axes1_' + outname + '.dat')
+
+    # Write gnuplot output
+    with open('gnu_' + outname + '.dat', "wt") as f:
+        for i in xrange((i_val+1)*2):
+            for j in xrange((j_val+1)*2):
+                f.write("%s\t%s\t%s\n" % (axes[0][i], axes[1][j], pmf_out[i][j]))
+            f.write("\n")
+
+##  END MAIN  #########################################################
+
+##  FUNCTIONS  ########################################################
+
+class _index_expression_class:
+    import sys
+    maxint = sys.maxint
+    def __getitem__(self, item):
+        if type(item) != type(()):
+            return (item,)
+        else:
+            return item
+    def __len__(self):
+        return self.maxint
+    def __getslice__(self, start, stop):
+        if stop == self.maxint:
+            stop = None
+        return self[start:stop:None]
+
+def wham(data, bins, t, conv_limit = 0.001):
+    beta = 1./(kB*t)
+    dim = len(bins)
+    nwin = len(data)
+    axes = map(binAxis, bins)
+    hist = []
+    pot = []
+    for window in data:
+        rc0, fc, rc = window
+        hist.append(histogram(rc, bins))
+        pot.append(biasPotential(rc0, fc, axes))
+    hist = np.array(hist)
+    pot = np.array(pot)
+    npoints = integrate(hist)
+    index = _index_expression_class()[::] + dim*_index_expression_class()[np.newaxis]
+    f = np.zeros(nwin, np.float)
+    lastf = f
+    num = 1.*np.add.reduce(hist, 0)
+    while 1:
+        #	den = np.add.reduce(npoints[index] * np.exp(beta*(f[index]-pot)))
+        expnt = beta * ( f[index] - pot )
+        OK    = np.greater ( expnt, -200. )
+        den   = np.add.reduce ( npoints[index] * np.exp ( np.where ( OK, expnt, -200. ) ) )
+        good  = np.not_equal(den, 0.)
+        rho   = num/den
+        rho   = np.where(good, rho, 0.)
+        expnt = - beta * pot
+        OK    = np.greater ( expnt, -200. )
+        f     = - np.log ( integrate ( rho * np.exp ( np.where ( OK, expnt, -200. ) ) ) ) / beta
+        convergence = np.maximum.reduce(np.fabs(f-lastf))
+        print convergence
+        if convergence < conv_limit: break
+        lastf = f
+    mask = np.equal(rho, 0.)
+    pmf = -np.log(rho+mask)/beta + inf*mask
+    pmf_min = np.minimum.reduce(np.ravel(pmf))
+    pmf = pmf - pmf_min
+    return axes, rho, pmf
+
+def binAxis(bin_spec):
+    min, max, n = bin_spec
+    w = (max-min)/(n-1)
+    return min + w*np.arange(0.,n)
+
+def histogram(data, bins):
+    dim = data.shape[1]
+    if dim != len(bins):
+        raise ValueError, 'Inconsistent data'
+    min = np.array(map(lambda b: b[0], bins))
+    max = np.array(map(lambda b: b[1], bins))
+    n = np.array(map(lambda b: b[2], bins))
+    w = (max-min)/(n-1)
+    indices = ((data-min+w/2)/w).astype(np.int)
+    h = apply(np.zeros, (tuple(n), np.int))
+    for i in range(data.shape[0]):
+        ind = indices[i]
+        if np.logical_and.reduce(np.logical_and( np.greater_equal(ind, 0), np.less(ind, n))):
+            ind = tuple(ind)
+            h[ind] = h[ind] + 1
+    return h
+
+def biasPotential(rc0, fc, axes):
+    dim = rc0.shape[0]
+    p = np.array(0.)
+    for i in range(dim):
+        p = np.add.outer(p, fc[i]*(axes[i]-rc0[i])**2)
+    return p
+
+def integrate(a):
+    while len(a.shape) > 1:
+        a = np.add.reduce(a, -1)
+    return a
+
+##  END FUNCTIONS  ####################################################
+
+main()
