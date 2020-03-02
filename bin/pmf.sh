@@ -80,6 +80,12 @@
       #   shift
       #   ;;
 
+      "--check" )            # pmf check
+        echo "Finished: `grep "Coordinates written" *.log | wc -l`"
+        echo "Pending: `grep -L "Coordinates written" *.log | wc -l`"
+        exit
+        ;;
+
       "-j" )                 # .job only
         job_only=1
         ;;
@@ -101,6 +107,7 @@
         echo " -f | --file         configuration file"
         echo " -c | --coord        coordinates folder"
         echo " --method            QM method (def: $qm_method_def)"
+        echo " --check             check PMF progress"
         # echo " --charge            QM charge (def: $qm_charge_def)"
         # echo " -t | --temperature  temperature bath (def: )"
         echo " -j                  job only (creates files but do not launch)"

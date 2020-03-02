@@ -74,9 +74,14 @@
       #   shift
       #   ;;
 
-      "-j" )                 # .job only
+      "--process" )           # process ended PES
+        process=1
+        ;;
+
+      "-j" )                  # .job only
         job_only=1
         ;;
+
 
       "-h"|"--help" )         # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
@@ -95,6 +100,7 @@
         echo " -f | --file         configuration file"
         echo " -c | --coord        intial coordinates file"
         echo " --method            QM method (def: $qm_method_def)"
+        echo " --process           process ended PES files"
         # echo " --charge            QM charge (def: $qm_charge_def)"
         echo " -j                  job only (creates files but do not launch)"
         echo " -h | --help         print this help and exit"
@@ -111,6 +117,19 @@
   qm_method=${qm_method:=$qm_method_def}
   # qm_charge=${qm_charge:=$qm_charge_def}
   job_only=${job_only:=0}
+
+  ## Process (if requested)
+  if [ "$process" == 1 ]; then
+    rm *.job
+    mkdir ${name}-crd
+    mv pes.*.crd ${name}-crd/
+    mkdir ${name}-ep
+    mv ep.* ${name}-ep/
+    for i in `seq -w 0 99`; do
+      cat ${name}-ep/ep.${i}.XX.out >> ${name}-${qm_method}.dat 2>/dev/null
+    done
+    exit
+  fi
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
