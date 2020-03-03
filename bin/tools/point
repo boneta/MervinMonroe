@@ -1,0 +1,39 @@
+#!/usr/bin/python2
+
+import argparse
+
+# Parser
+my_parser = argparse.ArgumentParser(prog='point',
+                                    description='selects a point for given coordinates')
+my_parser.add_argument('-f',
+                       required=True,
+                       type=str,
+                       help='configuration file')
+my_parser.add_argument('-c',
+                       required=True,
+                       metavar=('x','y'),
+                       type=float,
+                       help='y x',
+                       nargs=2)
+args = my_parser.parse_args()
+
+config_file = args.f
+coord = (args.c[0], args.c[1])
+
+p = 0
+coord_res = []
+with open(config_file, "rt") as f:
+    for l in f:
+        l = l.split()
+        if l[0] == 'm':
+            coord_res.append((coord[p]-float(l[9]))/float(l[10]))
+            p += 1
+        elif l[0] == 'd':
+            coord_res.append((coord[p]-float(l[6]))/float(l[7]))
+            p += 1
+
+# round values
+coord_res = [round(i,0) for i in coord_res]
+coord_res = [int(i) for i in coord_res]
+
+print("pes.{:02d}.{:02d}.crd".format(coord_res[0],coord_res[1]))

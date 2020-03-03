@@ -121,12 +121,12 @@
   ## Process (if requested)
   if [ "$process" == 1 ]; then
     rm *.job
-    mkdir ${name}-crd
-    mv pes.*.crd ${name}-crd/
-    mkdir ${name}-ep
-    mv ep.* ${name}-ep/
+    mkdir pes-crd
+    mv pes.*.crd pes-crd/
+    mkdir pes-ep
+    mv ep.* pes-ep/
     for i in `seq -w 0 99`; do
-      cat ${name}-ep/ep.${i}.XX.out >> ${name}-${qm_method}.dat 2>/dev/null
+      cat pes-ep/ep.${i}.XX.out >> ${name}-${qm_method}.dat 2>/dev/null
     done
     exit
   fi
@@ -253,3 +253,9 @@
   sed -i "s/MERVIN_I/${i_val}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_J/${j_val}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_COORD/${coord_file}/g" ${workdir}/${name}.jobber
+
+  ## launch
+  if [ ${job_only} == "0" ]; then
+    { qsub ${name}.jobber ; } 2>/dev/null
+    { sbatch ${name}.jobber ; } 2>/dev/null
+  fi

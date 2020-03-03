@@ -225,3 +225,9 @@
   sed -i "s/MERVIN_J/${j_val}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_BIN/`ls *.bin`/g" ${workdir}/${name}.jobber
   sed -i "s|MERVIN_CRD_FOLDER|${coord_folder}|g" ${workdir}/${name}.jobber
+
+  ## launch
+  if [ ${job_only} == "0" ]; then
+    { qsub ${name}.jobber ; } 2>/dev/null
+    { sbatch ${name}.jobber ; } 2>/dev/null
+  fi

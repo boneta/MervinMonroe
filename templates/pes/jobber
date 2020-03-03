@@ -19,26 +19,7 @@ i_side=MERVIN_I
 j_side=MERVIN_J
 
 
-## i SIDE (:,0)
-filename="ep.XX.00"
-
-i_min=0
-i_max=$i_side
-j_min=0
-j_max=0
-coord="MERVIN_COORD"
-
-outfile="${filename}.out"
-inputfile="${filename}.inp"
-logfile="${filename}.log"
-
-
-cd $workdir
-echo -e "${i_min} ${i_max} ${j_min} ${j_max} ${coord} ${outfile}" > ${inputfile}
-./a.out < ${inputfile} > ${logfile}
-rm ${inputfile}
-
-## j SIDE (:,:)
+## PROGRESIVE LAUNCH (:,:)
 cd $workdir
 for i in `seq -w 0 ${i_side}`; do
   filename="ep.${i}.XX"
@@ -47,7 +28,11 @@ for i in `seq -w 0 ${i_side}`; do
   i_max="$i"
   j_min=0
   j_max=$j_side
-  coord="pes.${i}.00.crd"
+  if [ "$i" == "00" ]; then
+    coord="MERVIN_COORD"
+  else
+    coord="pes.`printf %02d $((10#$i-1))`.00.crd"
+  fi
 
   outfile="${filename}.out"
   jobfile="${filename}.job"
@@ -73,8 +58,11 @@ for i in `seq -w 0 ${i_side}`; do
   echo "./a.out < ${inputfile} > ${logfile}"           >> ${jobfile}
   echo "rm ${inputfile}"                               >> ${jobfile}
 
-  qsub ${jobfile}
-  sbatch ${jobfile}
-  sleep 1
+  { qsub ${jobfile} ; } 2>/dev/null
+  { sbatch ${jobfile} ; } 2>/dev/null
+
+  while [ ! -f "pes.${i}.00.crd" ]; do
+    sleep 1
+  done
 
 done

@@ -148,3 +148,9 @@
   cp ${mervinmonroe}/${templates_subfolder}/locate/jobber  ${workdir}/${name}.job
   sed -i "s/MERVIN_JOBNAME/${system}-${name}-${coord_file%.*}/g" ${workdir}/${name}.job
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.job
+
+  ## launch
+  if [ ${job_only} == "0" ]; then
+    { qsub ${name}.job ; } 2>/dev/null
+    { sbatch ${name}.job ; } 2>/dev/null
+  fi

@@ -1,0 +1,48 @@
+#!/usr/bin/env python2
+
+import    string
+import    sys
+import    os
+import    re
+
+v1 = 'dat_x'
+p1 = re.compile( v1 + ".*" )
+v2 = 'dat_y'
+p2 = re.compile( v2 + ".*" )
+idx = []
+for fn in os.listdir( "." ):
+    if( p1.match( fn ) ):
+        t = string.split( fn, v1 )[1]
+        if( not t in idx ):
+            idx.append( t )
+    if( p2.match( fn ) ):
+        t = string.split( fn, v2 )[1]
+        if( not t in idx ):
+            idx.append( t )
+
+cmd = file( "__tmp__.cmd", "wt" )
+cmd.write( """set term png
+set output 'manta.png'
+unset key
+set grid
+plot \\
+""" )
+for ext in idx:
+    f = file( v1 + ext, "rt" )
+    f.readline()
+    g = file( v2 + ext, "rt" )
+    g.readline()
+    h = file( "__tmp__" + ext, "wt" )
+    for i,j in zip(f,g):
+        h.write( i[:-1] + j )
+    h.flush()
+    h.close()
+    g.close()
+    f.close()
+    cmd.write( "\t'__tmp__%s' w l,\\\n"%( ext ) )
+cmd.write( "\t'__tmp__%s' w l"%( idx[-1] ) )
+cmd.close()
+os.system( "/usr/bin/env gnuplot __tmp__.cmd" )
+os.unlink( "__tmp__.cmd" )
+for ext in idx:
+    os.unlink( "__tmp__" + ext )

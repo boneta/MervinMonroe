@@ -150,6 +150,11 @@
       cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-back.job
       sed -i "s/MERVIN_JOBNAME/${system}-${name}-back/g" ${name}-back.job
       sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-back.job
+      # launch
+      if [ ${job_only} == "0" ]; then
+        { qsub ${name}-back.job ; } 2>/dev/null
+        { sbatch ${name}-back.job ; } 2>/dev/null
+      fi
       cd ..
 
       # for
@@ -165,6 +170,11 @@
       cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-for.job
       sed -i "s/MERVIN_JOBNAME/${system}-${name}-for/g" ${name}-for.job
       sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-for.job
+      # launch
+      if [ ${job_only} == "0" ]; then
+        { qsub ${name}-for.job ; } 2>/dev/null
+        { sbatch ${name}-for.job ; } 2>/dev/null
+      fi
       cd ..
     ;;
     "back" )
@@ -177,6 +187,11 @@
       cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-back.job
       sed -i "s/MERVIN_JOBNAME/${system}-${name}-back/g" ${name}-back.job
       sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-back.job
+      # launch
+      if [ ${job_only} == "0" ]; then
+        { qsub ${name}-back.job ; } 2>/dev/null
+        { sbatch ${name}-back.job ; } 2>/dev/null
+      fi
     ;;
     "for" )
       mv ${name}.f90 ${name}-for.f9
@@ -188,5 +203,10 @@
       cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-for.job
       sed -i "s/MERVIN_JOBNAME/${system}-${name}-for/g" ${name}-for.job
       sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-for.job
+      # launch
+      if [ ${job_only} == "0" ]; then
+        { qsub ${name}-for.job ; } 2>/dev/null
+        { sbatch ${name}-for.job ; } 2>/dev/null
+      fi
     ;;
   esac

@@ -191,3 +191,9 @@
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_I/${i_val}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_COORD/${coord_file}/g" ${workdir}/${name}.jobber
+
+  ## launch
+  if [ ${job_only} == "0" ]; then
+    { qsub ${name}.jobber ; } 2>/dev/null
+    { sbatch ${name}.jobber ; } 2>/dev/null
+  fi

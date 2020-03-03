@@ -49,8 +49,8 @@ for i in `seq -w 0 ${i_side}`; do
     echo "./a.out < ${inputfile} > ${logfile}"           >> ${jobfile}
     echo "rm ${inputfile} borra_${i}.${j}"               >> ${jobfile}
 
-    qsub ${jobfile}
-    sbatch ${jobfile}
+    { qsub ${jobfile} ; } 2>/dev/null
+    { sbatch ${jobfile} ; } 2>/dev/null
     sleep 1
 
   done

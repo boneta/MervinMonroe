@@ -183,7 +183,7 @@
     echo "cd $workdir/wham"                              >> ${name}-wham.job
     echo "python2 ${mervinmonroe}/${scripts_subfolder}/tools/wham-2D \\" >> ${name}-wham.job
     echo " --name $name --path ../ --temp $temperature --conv 0.001 \\"  >> ${name}-wham.job
-    echo " --time $production_ps --ij $i_val $j_val"     >> ${name}-wham.job
+    echo " --time $production_ps --ij $i_val $j_val > ${name}-wham.out"  >> ${name}-wham.job
     echo "cd .."                                         >> ${name}-wham.job
     cd ..
     exit
