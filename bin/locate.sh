@@ -73,6 +73,10 @@
         ts_search=".true."
         ;;
 
+      "-irc" )               # IRC and locate after
+        irc=1
+        ;;
+
       "-j" )                 # .job only
         job_only=1
         ;;
@@ -95,6 +99,7 @@
         echo " -c | --coord        intial coordinates file"
         echo " --method            QM method (def: $qm_method_def)"
         echo " -ts                 TS search"
+        echo " -irc                IRC and locate jobs after"
         echo " -j                  job only (creates files but do not launch)"
         echo " -h | --help         print this help and exit"
         echo
@@ -110,6 +115,7 @@
   qm_method=${qm_method:=$qm_method_def}
   ts_search=${ts_search:=$ts_search_def}
   job_only=${job_only:=0}
+  irc=${irc:=0}
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
@@ -148,6 +154,11 @@
   cp ${mervinmonroe}/${templates_subfolder}/locate/jobber  ${workdir}/${name}.job
   sed -i "s/MERVIN_JOBNAME/${system}-${name}-${coord_file%.*}/g" ${workdir}/${name}.job
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.job
+  if [ ${irc} == "1" ]&&[ "$ts_search" == ".true." ]; then
+    echo ""                                                                       >> ${name}.job
+    echo "${mervinmonroe}/mervinmonroe irc  \\"                                   >> ${name}.job
+    echo "  -s $system --method $qm_method --name TS -c ${name}-loc.crd --locate" >> ${name}.job
+  fi
 
   ## launch
   if [ ${job_only} == "0" ]; then

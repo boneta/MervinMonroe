@@ -74,6 +74,10 @@
         shift
         ;;
 
+      "-l"|"--locate" )      # locate too
+        locate=1
+        ;;
+
       "-j" )                 # .job only
         job_only=1
         ;;
@@ -98,12 +102,13 @@
         echo "                                  full          back and forward"
         echo "                                  back          only back (-1)"
         echo "                                  for           only forward (1)"
+        echo " -l | --locate                  launch locate jobs after IRC"
         echo " -j                             job only (creates files but do not launch)"
         echo " -h | --help                    print this help and exit"
         echo
         exit ;;
       *)
-        echo "ERROR: Wrong option '$subscript'. Use -h for help."
+        echo "ERROR: Wrong option '$arg'. Use -h for help."
         exit ;;
     esac
   done
@@ -113,6 +118,7 @@
   qm_method=${qm_method:=$qm_method_def}
   irc_direction=${irc_direction:=$irc_direction_def}
   job_only=${job_only:=0}
+  locate=${locate:=0}
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
@@ -137,76 +143,62 @@
 
   case $irc_direction in
     "full" )
-      # back
-      mkdir ${name}-back
-      cp $coord_file ${name}-back/
-      cp ${name}.f90 ${name}-back/${name}-back.f90
-      cd ${name}-back
+      for dir in back for; do
+        mkdir ${name}-${dir}
+        cp $coord_file ${name}-${dir}/
+        cp ${name}.f90 ${name}-${dir}/${name}-${dir}.f90
+        cd ${name}-${dir}
+        cp ${system_dir}/*.bin  .
+        cp ${system_dir}/nofix.f90  .
+        if [ "$dir" == "back" ]; then
+          sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-${dir}.f90
+        elif [ "$dir" == "for" ]; then
+          sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-${dir}.f90
+        fi
+        sed -i "s/MERVIN_COORD_OUT/${name}-${dir}/g" ${name}-${dir}.f90
+        ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-${dir}.f90
+        cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-${dir}.job
+        sed -i "s/MERVIN_JOBNAME/${system}-${name}-${dir}/g" ${name}-${dir}.job
+        sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-${dir}.job
+        if [ ${locate} == "1" ]; then
+          echo ""                                                                          >> ${name}-${dir}.job
+          echo "${mervinmonroe}/mervinmonroe locate  \\"                                   >> ${name}-${dir}.job
+          echo "  -s $system --method $qm_method --name ${dir}-locate -c ${name}-${dir}.crd" >> ${name}-${dir}.job
+        fi
+        if [ ${job_only} == "0" ]; then
+          { qsub ${name}-${dir}.job ; } 2>/dev/null
+          { sbatch ${name}-${dir}.job ; } 2>/dev/null
+        fi
+        cd ..
+      done
+    ;;
+    "back"|"for")
+      dir=$irc_direction
+      mkdir ${name}-${dir}
+      cp $coord_file ${name}-${dir}/
+      cp ${name}.f90 ${name}-${dir}/${name}-${dir}.f90
+      cd ${name}-${dir}
       cp ${system_dir}/*.bin  .
       cp ${system_dir}/nofix.f90  .
-      sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-back.f90
-      sed -i "s/MERVIN_COORD_OUT/${name}-back/g" ${name}-back.f90
-      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-back.f90
-      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-back.job
-      sed -i "s/MERVIN_JOBNAME/${system}-${name}-back/g" ${name}-back.job
-      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-back.job
-      # launch
+      if [ "$dir" == "back" ]; then
+        sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-${dir}.f90
+      elif [ "$dir" == "for" ]; then
+        sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-${dir}.f90
+      fi
+      sed -i "s/MERVIN_COORD_OUT/${name}-${dir}/g" ${name}-${dir}.f90
+      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-${dir}.f90
+      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-${dir}.job
+      sed -i "s/MERVIN_JOBNAME/${system}-${name}-${dir}/g" ${name}-${dir}.job
+      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-${dir}.job
+      if [ ${locate} == "1" ]; then
+        echo ""                                                                          >> ${name}-${dir}.job
+        echo "${mervinmonroe}/mervinmonroe locate  \\"                                   >> ${name}-${dir}.job
+        echo "  -s $system --method $qm_method --name ${dir}-locate -c ${name}-${dir}.crd" >> ${name}-${dir}.job
+      fi
       if [ ${job_only} == "0" ]; then
-        { qsub ${name}-back.job ; } 2>/dev/null
-        { sbatch ${name}-back.job ; } 2>/dev/null
+        { qsub ${name}-${dir}.job ; } 2>/dev/null
+        { sbatch ${name}-${dir}.job ; } 2>/dev/null
       fi
       cd ..
-
-      # for
-      mkdir ${name}-for
-      cp $coord_file ${name}-for/
-      mv ${name}.f90 ${name}-for/${name}-for.f90
-      cd ${name}-for
-      cp ${system_dir}/*.bin  .
-      cp ${system_dir}/nofix.f90  .
-      sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-for.f90
-      sed -i "s/MERVIN_COORD_OUT/${name}-for/g" ${name}-for.f90
-      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-for.f90
-      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-for.job
-      sed -i "s/MERVIN_JOBNAME/${system}-${name}-for/g" ${name}-for.job
-      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-for.job
-      # launch
-      if [ ${job_only} == "0" ]; then
-        { qsub ${name}-for.job ; } 2>/dev/null
-        { sbatch ${name}-for.job ; } 2>/dev/null
-      fi
-      cd ..
-    ;;
-    "back" )
-      mv ${name}.f90 ${name}-back.f9
-      cp ${system_dir}/*.bin  .
-      cp ${system_dir}/nofix.f90  .
-      sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-back.f90
-      sed -i "s/MERVIN_COORD_OUT/${name}-back/g" ${name}-back.f90
-      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-back.f90
-      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-back.job
-      sed -i "s/MERVIN_JOBNAME/${system}-${name}-back/g" ${name}-back.job
-      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-back.job
-      # launch
-      if [ ${job_only} == "0" ]; then
-        { qsub ${name}-back.job ; } 2>/dev/null
-        { sbatch ${name}-back.job ; } 2>/dev/null
-      fi
-    ;;
-    "for" )
-      mv ${name}.f90 ${name}-for.f9
-      cp ${system_dir}/*.bin  .
-      cp ${system_dir}/nofix.f90  .
-      sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-for.f90
-      sed -i "s/MERVIN_COORD_OUT/${name}-for/g" ${name}-for.f90
-      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-for.f90
-      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-for.job
-      sed -i "s/MERVIN_JOBNAME/${system}-${name}-for/g" ${name}-for.job
-      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-for.job
-      # launch
-      if [ ${job_only} == "0" ]; then
-        { qsub ${name}-for.job ; } 2>/dev/null
-        { sbatch ${name}-for.job ; } 2>/dev/null
-      fi
     ;;
   esac
