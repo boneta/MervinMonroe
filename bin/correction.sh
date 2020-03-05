@@ -152,7 +152,7 @@
         echo
         exit ;;
       *)
-        echo "ERROR: Wrong option '$subscript'. Use -h for help."
+        echo "ERROR: Wrong option '$arg'. Use -h for help."
         exit ;;
     esac
   done

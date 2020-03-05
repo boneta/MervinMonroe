@@ -111,6 +111,7 @@ OBJS =	BLASD.o\
 		amberfile_io.o\
 		my_random.o\
 		lbfgsb.o cg+.o\
+		lbfgsb_w.o\
 		mini_wrapper.o\
 		hack_kie.o\
 		dynamo.o
@@ -144,4 +145,3 @@ LAPACK.o:
 
 .c.o:
 	$(CC) -c $< -o $@
-

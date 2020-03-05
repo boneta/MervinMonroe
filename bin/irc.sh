@@ -74,6 +74,11 @@
         shift
         ;;
 
+      "-h"|"--hessian" )     # hessian dump
+        hessian_dump=$1
+        shift
+        ;;
+
       "-l"|"--locate" )      # locate too
         locate=1
         ;;
@@ -102,6 +107,7 @@
         echo "                                  full          back and forward"
         echo "                                  back          only back (-1)"
         echo "                                  for           only forward (1)"
+        echo " -h | --hessian                 hessian TS file to use (update.dump)"
         echo " -l | --locate                  launch locate jobs after IRC"
         echo " -j                             job only (creates files but do not launch)"
         echo " -h | --help                    print this help and exit"
@@ -126,8 +132,6 @@
   if [ ! -n "$coord_file" ]; then echo "ERROR: No initial coordinates set"; exit; fi
 
   ## Build the f90 file
-  cp ${system_dir}/*.bin  ${workdir}/
-  cp ${system_dir}/nofix.f90  ${workdir}/
   cp ${mervinmonroe}/${templates_subfolder}/irc/01-irc  ${workdir}/${name}.f90
 
   # set the system binary to be read
@@ -165,40 +169,42 @@
           echo "${mervinmonroe}/mervinmonroe locate  \\"                                   >> ${name}-${dir}.job
           echo "  -s $system --method $qm_method --name ${dir}-locate -c ${name}-${dir}.crd" >> ${name}-${dir}.job
         fi
+        if [ "$hessian_dump" != "" ]; then
+          cp ../${hessian_dump} update.dump
+        fi
         if [ ${job_only} == "0" ]; then
           { qsub ${name}-${dir}.job ; } 2>/dev/null
           { sbatch ${name}-${dir}.job ; } 2>/dev/null
         fi
         cd ..
       done
+      rm ${workdir}/${name}.f90
     ;;
     "back"|"for")
       dir=$irc_direction
-      mkdir ${name}-${dir}
-      cp $coord_file ${name}-${dir}/
-      cp ${name}.f90 ${name}-${dir}/${name}-${dir}.f90
-      cd ${name}-${dir}
       cp ${system_dir}/*.bin  .
       cp ${system_dir}/nofix.f90  .
       if [ "$dir" == "back" ]; then
-        sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-${dir}.f90
+        sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}.f90
       elif [ "$dir" == "for" ]; then
-        sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}-${dir}.f90
+        sed -i "s/MERVIN_IRC_DIRECTION/1/g" ${name}.f90
       fi
-      sed -i "s/MERVIN_COORD_OUT/${name}-${dir}/g" ${name}-${dir}.f90
-      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-${dir}.f90
-      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-${dir}.job
-      sed -i "s/MERVIN_JOBNAME/${system}-${name}-${dir}/g" ${name}-${dir}.job
-      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-${dir}.job
+      sed -i "s/MERVIN_COORD_OUT/${name}/g" ${name}.f90
+      ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}.f90
+      cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}.job
+      sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${name}.job
+      sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}.job
       if [ ${locate} == "1" ]; then
-        echo ""                                                                          >> ${name}-${dir}.job
-        echo "${mervinmonroe}/mervinmonroe locate  \\"                                   >> ${name}-${dir}.job
-        echo "  -s $system --method $qm_method --name ${dir}-locate -c ${name}-${dir}.crd" >> ${name}-${dir}.job
+        echo ""                                                                     >> ${name}.job
+        echo "${mervinmonroe}/mervinmonroe locate  \\"                              >> ${name}.job
+        echo "  -s $system --method $qm_method --name ${dir}-locate -c ${name}.crd" >> ${name}.job
+      fi
+      if [ "$hessian_dump" != "" ]; then
+        cp ${hessian_dump} update.dump
       fi
       if [ ${job_only} == "0" ]; then
-        { qsub ${name}-${dir}.job ; } 2>/dev/null
-        { sbatch ${name}-${dir}.job ; } 2>/dev/null
+        { qsub ${name}.job ; } 2>/dev/null
+        { sbatch ${name}.job ; } 2>/dev/null
       fi
-      cd ..
     ;;
   esac

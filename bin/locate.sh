@@ -17,6 +17,8 @@
   name_def="locate"
   qm_method_def="AM1"
   ts_search_def=".false."
+  functional_def="M062X"
+  basis_def="6-31+G(d,p)"
 
 
 ##  SCRIPT  #########################################################
@@ -73,6 +75,20 @@
         ts_search=".true."
         ;;
 
+      "-gauss" )             # Gaussian calc
+        gauss_loc="-gauss"
+        ;;
+
+      "--functional" )        # DFT functional
+        qm_method=$1
+        shift
+        ;;
+
+      "--basis" )             # Basis Set
+        qm_method=$1
+        shift
+        ;;
+
       "-irc" )               # IRC and locate after
         irc=1
         ;;
@@ -100,12 +116,15 @@
         echo " --method            QM method (def: $qm_method_def)"
         echo " -ts                 TS search"
         echo " -irc                IRC and locate jobs after"
+        echo " -gauss              use Gaussian"
+        echo " --functional        DFT functional (def: $functional_def)"
+        echo " --basis             basis set (def: $basis_def)"
         echo " -j                  job only (creates files but do not launch)"
         echo " -h | --help         print this help and exit"
         echo
         exit ;;
       *)
-        echo "ERROR: Wrong option '$subscript'. Use -h for help."
+        echo "ERROR: Wrong option '$arg'. Use -h for help."
         exit ;;
     esac
   done
@@ -114,6 +133,8 @@
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
   ts_search=${ts_search:=$ts_search_def}
+  functional=${functional:=$functional_def}
+  basis=${basis:=$basis_def}
   job_only=${job_only:=0}
   irc=${irc:=0}
 
@@ -125,7 +146,7 @@
   ## Build the f90 file
   cp ${system_dir}/*.bin  ${workdir}/
   cp ${system_dir}/nofix.f90  ${workdir}/
-  cp ${mervinmonroe}/${templates_subfolder}/locate/01-locate  ${workdir}/${name}.f90
+  cp ${mervinmonroe}/${templates_subfolder}/locate/01-locate${gauss_loc}  ${workdir}/${name}.f90
 
   # set the system binary to be read
   sed -i "s/MERVIN_BIN/`ls *.bin`/g" ${workdir}/${name}.f90
@@ -134,7 +155,7 @@
   # include the QM atoms
   cat ${system_dir}/qm-atoms.f90 >> ${workdir}/${name}.f90
   # continue the f90
-  cat ${mervinmonroe}/${templates_subfolder}/locate/02-locate >> ${workdir}/${name}.f90
+  cat ${mervinmonroe}/${templates_subfolder}/locate/02-locate${gauss_loc} >> ${workdir}/${name}.f90
   sed -i "s/MERVIN_METHOD/$qm_method/g" ${workdir}/${name}.f90
   # set saddle search (TS or minima)
   sed -i "s/MERVIN_SADDLE/$ts_search/g" ${workdir}/${name}.f90
@@ -147,17 +168,37 @@
     # sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-loc/g" ${workdir}/${name}.f90
   fi
 
-  ## Compile
-  ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std --locate -f ${name}.f90
+  ## Compile and with_gaussian
+  if [ "$gauss_loc" == "-gauss" ]; then
+    # with_gaussian
+    cp ${mervinmonroe}/${templates_subfolder}/locate/with_gaussian.f90  ${workdir}/with_gaussian.f90
+    sed -i "s/MERVIN_FUNCTIONAL/$functional/g" ${workdir}/with_gaussian.f90
+    sed -i "s/MERVIN_BASIS/$basis/g" ${workdir}/with_gaussian.f90
+    qm_charge=`awk '/qm_charge/{print $3}' ${workdir}/${name}.f90  | sed -n 2p`
+    sed -i "s/MERVIN_CHARGE/$qm_charge/g" ${workdir}/with_gaussian.f90
+    # compile
+    ${mervinmonroe}/${scripts_subfolder}/compile.sh --version gauss --locate -f ${name}.f90
+  else
+    # compile
+    ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std --locate -f ${name}.f90
+  fi
 
   ## Build the job
   cp ${mervinmonroe}/${templates_subfolder}/locate/jobber  ${workdir}/${name}.job
   sed -i "s/MERVIN_JOBNAME/${system}-${name}-${coord_file%.*}/g" ${workdir}/${name}.job
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.job
+  if [ "$gauss_loc" == "-gauss" ]; then
+    sed -i "s/MERVIN_CORES_SGE/$ -pe mp8 8/g" ${workdir}/${name}.job
+    sed -i "s/MERVIN_CORES_SLURM/8/g" ${workdir}/${name}.job
+  else
+    sed -i "s/MERVIN_CORES_SGE/ /g" ${workdir}/${name}.job
+    sed -i "s/MERVIN_CORES_SLURM/1/g" ${workdir}/${name}.job
+  fi
+
   if [ ${irc} == "1" ]&&[ "$ts_search" == ".true." ]; then
-    echo ""                                                                       >> ${name}.job
-    echo "${mervinmonroe}/mervinmonroe irc  \\"                                   >> ${name}.job
-    echo "  -s $system --method $qm_method --name TS -c ${name}-loc.crd --locate" >> ${name}.job
+    echo ""                                                                                      >> ${name}.job
+    echo "${mervinmonroe}/mervinmonroe irc  \\"                                                  >> ${name}.job
+    echo "  -s $system --method $qm_method --name TS -c ${name}-loc.crd --locate -h update.dump" >> ${name}.job
   fi
 
   ## launch

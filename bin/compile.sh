@@ -96,15 +96,29 @@
           ${mervinmonroe}/${templates_subfolder}/compile/panadero.o \
           $code_file ${dydir}/DYNAMO.a
       else
-        $FC -DF95 -I${dydir}/modules -I${mervinmonroe}/${templates_subfolder}/compile/ \
-          -J${dydir}/modules -w $Olevel -frecord-marker=4 -finit-local-zero \
+        $FC -DF95 -I${dydir}/modules -w $Olevel -frecord-marker=4 -finit-local-zero \
+          -I${mervinmonroe}/${templates_subfolder}/compile/ -J${dydir}/modules \
           $code_file ${dydir}/DYNAMO.a
       fi
       ;;
     "gauss" )
       dydir=$dynamo_gauss
-      $FC -DF95 -I${dydir}/src -I. -J. -w $Olevel -frecord-marker=4 -finit-local-zero \
-        $code_file ${dydir}/src/dynamo.a
+      if [ "$locate" == "true" ]; then
+        # compile 'panadero.f90'
+        $FC -DF95 -I${dydir}/src -w $Olevel -frecord-marker=4 -finit-local-zero \
+          -J${mervinmonroe}/${templates_subfolder}/compile/ \
+          -c ${mervinmonroe}/${templates_subfolder}/compile/panadero.f90 \
+          -o ${mervinmonroe}/${templates_subfolder}/compile/panadero.o
+        # compile program
+        $FC -DF95 -I${dydir}/src -w $Olevel -frecord-marker=4 -finit-local-zero \
+          -I${mervinmonroe}/${templates_subfolder}/compile/ \
+          ${mervinmonroe}/${templates_subfolder}/compile/panadero.o \
+          $code_file ${dydir}/src/dynamo.a
+      else
+        $FC -DF95 -I${dydir}/src -w $Olevel -frecord-marker=4 -finit-local-zero \
+          -I. -J. \
+          $code_file ${dydir}/src/dynamo.a
+      fi
       ;;
     *)
       echo "ERROR: Wrong Dynamo version specified ('$dynamo_v')"
