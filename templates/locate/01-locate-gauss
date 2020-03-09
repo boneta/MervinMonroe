@@ -9,7 +9,7 @@ program locate
   real( kind=dp ), dimension(:), allocatable :: x
 
   call dynamo_header
-  call cabinitio_init
+  ! call cabinitio_init
 
   ! read binary file directly (faster)
   call mm_system_read ( "MERVIN_BIN" )
@@ -17,4 +17,4 @@ program locate
   ! read coordinates
   call coordinates_read( "MERVIN_COORD_IN" )
 
-  allocate( acs(1:natoms), flg(1:natoms) )
+  allocate( acs(1:natoms) )

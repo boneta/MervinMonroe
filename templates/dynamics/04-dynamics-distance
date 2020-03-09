@@ -1,0 +1,19 @@
+
+  ! DISTANCE
+  r2 = MERVIN_D0_dp MERVIN_STEP_dp
+  call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A1 /) ) )
+  call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A2 /) ) )
+  call constraint_define( type = "DISTANCE", &
+                          fc = MERVIN_FC._dp, &
+                          eq = r2)
+
+  ! Calculate gradient
+  call gradient
+
+  do g = 1, 1000
+    if( grms < 40._dp ) cycle
+    atmcrd = atmcrd - atmder / dsqrt( sum( atmder ** 2 ) ) * 0.01_dp
+    call gradient
+  end do
+
+  call random_initialize( my_random() )

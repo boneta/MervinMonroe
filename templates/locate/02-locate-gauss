@@ -1,10 +1,6 @@
 
   call cabinitio_setup( acs )
 
-  call my_sele( flg )
-  call atoms_fix( .not. flg )
-  flg = flg .and. .not. acs
-
   call energy_initialize
   call energy_non_bonding_options( &
     list_cutoff   = 18.0_dp, &
@@ -16,12 +12,11 @@
   use_hessian_recalc = 1000
   use_hessian_method = "BOFILL"
 
-  skip_cabinitio = .false.
   call energy
 
   call setup_optimization( &
     core_atoms         = acs, &
-    envi_atoms         = flg, &
+    envi_atoms         = .not. acs, &
     step_number        = 1000, &
     gradient_tolerance = 0.5_dp, &
     print_frequency    = 1, &
@@ -58,7 +53,7 @@
   call coordinates_write ( "MERVIN_COORD_OUT.crd" )
   call pdb_write ( "MERVIN_COORD_OUT.pdb" )
 
-  call atoms_fix( .not. ( flg .or. acs ) )
+  call atoms_fix( acs .and. .not. acs )
   call gradient
   j = next_unit()
   open( unit = j, file = "forces.dump", action = "write", form = "formatted" )
@@ -81,7 +76,7 @@
 
   deallocate( x, acs, flg )
 
-  call cabinitio_exit
+  ! call cabinitio_exit
   call dynamo_footer
 
 end

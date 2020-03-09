@@ -1,0 +1,84 @@
+#!/usr/bin/python2
+
+import sys
+import string
+
+def __check ( data, id, val, rev ):
+    if ( rev==0 ):
+        return(data[id]<val)
+    else:
+        return(data[id]>val)
+
+def __midpt ( data, id ):
+    return(data[id])
+
+def __quicksort ( idx, data, lo0, hi0, cmp_call, mid_call ):
+    lo=lo0
+    hi=hi0
+    if ( hi0>lo0 ):
+        mid=mid_call(data,idx[(lo0+hi0)/2])
+        while ( lo<=hi ):
+            while ( lo<hi0 and cmp_call(data,idx[lo],mid,0) ): lo+=1
+            while ( hi>lo0 and cmp_call(data,idx[hi],mid,1) ): hi-=1
+            if ( lo<=hi ):
+                tmp=idx[lo]
+                idx[lo]=idx[hi]
+                idx[hi]=tmp
+                lo+=1
+                hi-=1
+        if ( lo0<hi ): __quicksort(idx,data,lo0,hi,cmp_call,mid_call)
+        if ( lo<hi0 ): __quicksort(idx,data,lo,hi0,cmp_call,mid_call)
+
+def __load_data ( fname ):
+    m=.0
+    s=.0
+    n=0
+    fd=open(fname,'rt')
+    r=string.atof(string.split(fd.readline())[1])
+    line=fd.readline()
+    while ( line!='' ):
+        n+=1
+        m+=string.atof(line)
+        line=fd.readline()
+    m/=n
+    fd.seek(0)
+    fd.readline()
+    line=fd.readline()
+    while ( line!='' ):
+        s+=(string.atof(line)-m)**2.
+        line=fd.readline()
+    fd.close()
+    s/=(n-1)
+    s=s**.5
+    return(r,m,s)
+
+mean=[]
+stdv=[]
+refv=[]
+nits=0
+
+if ( len(sys.argv)==1 ):
+    sys.exit(1)
+
+for item in sys.argv[1:]:
+    r,m,s=__load_data(item)
+    refv.append(r)
+    mean.append(m)
+    stdv.append(s)
+    nits+=1
+
+idx=range(nits)
+__quicksort(idx,mean,0,nits-1,__check,__midpt)
+
+m=0
+while (m<nits):
+    print '%-20s(%-20.10lf)%20.10lf%10.5lf'%(sys.argv[1+idx[m]],refv[idx[m]],mean[idx[m]],stdv[idx[m]])
+    m+=1
+
+print
+nits-=1
+m=0
+while (m<nits):
+    if ( mean[idx[m+1]]-stdv[idx[m+1]] > mean[idx[m]]+stdv[idx[m]] ):
+        print '## Poor overlap: %s / %s'%(sys.argv[1+idx[m]],sys.argv[1+idx[m+1]])
+    m+=1

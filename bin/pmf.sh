@@ -186,6 +186,10 @@
     echo " --time $production_ps --ij $i_val $j_val > ${name}-wham.out"  >> ${name}-wham.job
     echo "cd .."                                         >> ${name}-wham.job
     cd ..
+    if [ ${job_only} == "0" ]; then
+      { qsub ${name}-wham.job ; } 2>/dev/null
+      { sbatch ${name}-wham.job ; } 2>/dev/null
+    fi
     exit
   fi
 

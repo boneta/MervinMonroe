@@ -22,6 +22,7 @@ mervinmonroe [options]
   * irc
   * pmf
   * correction
+  * dynamics
   * tools
 
 ### Configuration

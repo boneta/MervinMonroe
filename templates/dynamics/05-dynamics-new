@@ -1,0 +1,35 @@
+
+  call velocity_assign( MERVIN_TEMPERATURE_dp, .false. )
+
+  ! equilibration options
+  call dynamics_options( &
+    time_step       = 0.001_dp, &     ! 1fs
+    print_frequency = 100, &
+    steps           = MERVIN_EQUILIBRATION_STEPS )
+
+  call langevin_verlet_dynamics( MERVIN_TEMPERATURE_dp, 100._dp )
+
+  ! production options
+  call dynamics_options( &
+    time_step       = 0.001_dp, &     ! 1fs
+    print_frequency = 100, &
+    save_frequency  = 100, &
+    coordinate_file = "MERVIN_COORD_OUT.dcd", &     ! trajectory
+    steps           = MERVIN_PRODUCTION_STEPS )
+
+  call constraint_writing_start
+
+  ! production run
+  call langevin_verlet_dynamics( MERVIN_TEMPERATURE_dp, 100._dp )
+
+  call constraint_writing_stop
+  ! write final coordinates and velocities
+  call coordinates_write ( "MERVIN_COORD_OUT.crd" )
+  call velocity_write ( "MERVIN_COORD_OUT.vel" )
+
+  deallocate( flg )
+
+  call dynamo_footer
+
+end
+include 'nofix.f90'

@@ -27,7 +27,7 @@
   export scripts_subfolder="bin"
   export templates_subfolder="templates"
 
-  export mervinmonroe_version="0.2.2 - 05032020"
+  export mervinmonroe_version="0.2.3 - 09032020"
 
 ##  SCRIPT  #########################################################
   ## Execute configuration file
@@ -99,6 +99,9 @@
     "correction"|"corr" )        # correction
       ${mervinmonroe}/${scripts_subfolder}/correction.sh $@
       ;;
+    "dynamics"|"dyn" )           # dynamics
+      ${mervinmonroe}/${scripts_subfolder}/dynamics.sh $@
+      ;;
     "tools"|"t" )                # tools
       subtool=$1
       shift
@@ -133,6 +136,7 @@
       echo " irc                          IRC calculation"
       echo " pmf                          PMF calculation"
       echo " correction | corr            correction calculation"
+      echo " dynamics | dyn               molecular dynamics"
       echo " tools | t                    tools (miscellaneous)"
       echo " -h | --help                  print this help and exit"
       echo

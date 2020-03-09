@@ -22,6 +22,7 @@ program builder
 end
 EOD
 
-dynamer bld.f90 
+## Compile
+${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${fortname} 
 ./a.out
 rm -f borra

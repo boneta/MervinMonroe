@@ -1,0 +1,18 @@
+#!/bin/bash
+
+## SGE
+#$ -q BIFIZCAM
+#$ -N MERVIN_JOBNAME
+#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -R yes
+
+## SLURM
+#SBATCH -J MERVIN_JOBNAME
+#SBATCH -o /home/boneta/msg/MERVIN_JOBNAME.msg
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH -p bifi
+
+workdir="MERVIN_WORKDIR"
+cd $workdir
+./a.out > MERVIN_JOBNAME.log
