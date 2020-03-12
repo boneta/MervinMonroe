@@ -1,0 +1,69 @@
+#!/usr/bin/env python2
+# encoding: utf-8
+
+import os
+import numpy as np
+import argparse
+
+# Parser
+my_parser = argparse.ArgumentParser(prog='trimmer',
+                                    description='trims pmf file')
+my_parser.add_argument('pmf',
+                       type=str,
+                       help='pmf file')
+my_parser.add_argument('--pes',
+                       type=str,
+                       help='pes file to do it automatically')
+args = my_parser.parse_args()
+
+pmffile = args.pmf
+outfile = os.path.splitext(pmffile)[0] + '-trimed' + os.path.splitext(pmffile)[1]
+
+print "                 --   trimmer   --"
+
+## Get the boundaries to trim
+if args.pes is None:
+    print ""
+    x_min = float(input("x min: "))
+    x_max = float(input("x max: "))
+    y_min = float(input("y min: "))
+    y_max = float(input("y max: "))
+else:
+    pes = np.loadtxt(args.pes, usecols=[0,1])
+    security_margin = 0.01
+    x_min = round(pes[:,0].min(),2) + security_margin
+    x_max = round(pes[:,0].max(),2) - security_margin
+    y_min = round(pes[:,1].min(),2) + security_margin
+    y_max = round(pes[:,1].max(),2) - security_margin
+
+# check input
+print """
+{:>8.2f} ·································
+         ·································
+         ·································
+         ·································
+         ·································
+         ·································
+         ·································
+{:>8.2f} ·································
+    {:>8.2f}                       {:>8.2f}
+""".format(y_max, y_min, x_min, x_max)
+
+verify = raw_input("Correct? (y/n): ")
+if verify.lower() != "y" and verify.lower() != "yes" :
+    print "Exiting"
+    exit(1)
+
+## Trim
+data = np.loadtxt(pmffile, usecols=[0,1,2])
+
+# delete rows out of the range
+i=0
+while i < data.shape[0] :
+    if ((data[i,0] < x_min) or (data[i,0] > x_max) or
+        (data[i,1] < y_min) or (data[i,1] > y_max)) :
+        data = np.delete(data, i, axis=0)
+        continue
+    i+=1
+
+np.savetxt(outfile, data, fmt='%20.10lf', delimiter=' ')

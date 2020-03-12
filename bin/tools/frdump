@@ -1,0 +1,40 @@
+#!/usr/bin/env python2
+# encoding: utf-8
+
+import sys
+import ecmb
+import argparse
+
+# Parser
+my_parser = argparse.ArgumentParser(prog='fr dump',
+                                    description='dump a frame from a .dcd trajectory')
+my_parser.add_argument('--fr',
+                       required=True,
+                       type=int,
+                       help='frame to dump')
+my_parser.add_argument('--crd',
+                       required=True,
+                       type=str,
+                       help='coordinates file (.crd)')
+my_parser.add_argument('--dcd',
+                       required=True,
+                       type=str,
+                       help='tajectory file (.dcd)')
+args = my_parser.parse_args()
+
+n_fr = args.fr
+
+# read system
+m = ecmb.Molec()
+m.load_crd( args.crd )
+m.dcd_read( args.dcd )
+
+# dump specified frame
+n_dcd = 0
+while( m.dcd_next() ):
+    n_dcd+=1
+    if n_dcd == n_fr :
+        name="fr"+str(n_fr)+".crd"
+        m.save_crd( name )
+        print n_fr, "-->", name
+        sys.exit()

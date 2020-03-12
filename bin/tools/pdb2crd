@@ -4,11 +4,14 @@ import sys
 import os
 import ecmb
 
-file = sys.argv[1]
-basename = os.path.splitext(file)[0]
+for element in sys.argv[1:]:
+    file = element
+    basename = os.path.splitext(file)[0]
 
-m=ecmb.Molec()
-m.load_pdb( file )
-m.guess_z()
-m.save_crd( basename + ".crd" )
-m.info_seq( basename + ".seq" )
+    print file, " --> ",basename+".pdb"
+
+    m=ecmb.Molec()
+    m.load_pdb( file )
+    m.guess_z()
+    m.save_crd( basename + ".crd" )
+    m=None
