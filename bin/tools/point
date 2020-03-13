@@ -1,14 +1,18 @@
 #!/usr/bin/python2
 
+import sys
+import numpy as np
 import argparse
 
 # Parser
 my_parser = argparse.ArgumentParser(prog='point',
-                                    description='selects a point for given coordinates')
+                                    description='selects a pes structure for given coordinates')
 my_parser.add_argument('-f',
-                       required=True,
                        type=str,
                        help='configuration file')
+my_parser.add_argument('--pes',
+                       type=str,
+                       help='PES file')
 my_parser.add_argument('-c',
                        required=True,
                        metavar=('x','y'),
@@ -17,23 +21,39 @@ my_parser.add_argument('-c',
                        nargs=2)
 args = my_parser.parse_args()
 
-config_file = args.f
+
+# coordinates to look fors
 coord = (args.c[0], args.c[1])
 
-p = 0
+# find coordinates
 coord_res = []
-with open(config_file, "rt") as f:
-    for l in f:
-        l = l.split()
-        if l[0] == 'm':
-            coord_res.append((coord[p]-float(l[9]))/float(l[10]))
-            p += 1
-        elif l[0] == 'd':
-            coord_res.append((coord[p]-float(l[6]))/float(l[7]))
-            p += 1
+if args.f is not None:              # from configuration file (pes.mm)
+    p = 0
+    with open(args.f, "rt") as f:
+        for l in f:
+            l = l.split()
+            if l[0] == 'm':
+                coord_res.append((coord[p]-float(l[9]))/float(l[10]))
+                p += 1
+            elif l[0] == 'd':
+                coord_res.append((coord[p]-float(l[6]))/float(l[7]))
+                p += 1
+    # round values
+    coord_res = [round(i,0) for i in coord_res]
 
-# round values
-coord_res = [round(i,0) for i in coord_res]
-coord_res = [int(i) for i in coord_res]
+elif args.pes is not None:          # from PES file (pes-AM1.dat)
+    pes = np.loadtxt(args.pes, usecols=[0,1,5,6])
+    coord_res[:] = pes[0,2:]
+    dist = np.sqrt((coord[0] - pes[0,0])**2 + (coord[1] - pes[0,1])**2)
+    for i in range(pes.shape[0]):
+        dist_tmp = np.sqrt((coord[0] - pes[i,0])**2 + (coord[1] - pes[i,1])**2)
+        if dist_tmp < dist:
+            dist = dist_tmp
+            coord_res = pes[i,2:]
 
-print("pes.{:02d}.{:02d}.crd".format(coord_res[0],coord_res[1]))
+else:                              # None
+    print "ERROR: configuration file or PES file required"
+    sys.exit(1)
+
+# print result (pes.XX.XX.crd)
+print("pes.{:02d}.{:02d}.crd".format(int(coord_res[0]),int(coord_res[1])))

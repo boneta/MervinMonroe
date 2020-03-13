@@ -198,7 +198,7 @@
   if [ ${irc} == "1" ]&&[ "$ts_search" == ".true." ]; then
     echo ""                                                                                      >> ${name}.job
     echo "${mervinmonroe}/mervinmonroe irc  \\"                                                  >> ${name}.job
-    echo "  -s $system --method $qm_method --name TS -c ${name}-ts.crd --locate -h update.dump"  >> ${name}.job
+    echo "  -s $system --method $qm_method --name TS -c ${name}-ts.crd --locate --hessian update.dump"  >> ${name}.job
   fi
 
   ## launch

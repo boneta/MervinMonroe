@@ -74,7 +74,7 @@
         shift
         ;;
 
-      "-h"|"--hessian" )     # hessian dump
+      "-he"|"--hessian" )    # hessian dump
         hessian_dump=$1
         shift
         ;;
@@ -107,7 +107,7 @@
         echo "                                  full          back and forward"
         echo "                                  back          only back (-1)"
         echo "                                  for           only forward (1)"
-        echo " -h | --hessian                 hessian TS file to use (update.dump)"
+        echo " -he | --hessian                hessian TS file to use (update.dump)"
         echo " -l | --locate                  launch locate jobs after IRC"
         echo " -j                             job only (creates files but do not launch)"
         echo " -h | --help                    print this help and exit"

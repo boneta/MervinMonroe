@@ -13,8 +13,8 @@ program irc
   real( kind=dp ), dimension(:), allocatable   :: eval, x_cur, g_cur, vec, mw, x_ref, x_1st
   type( dcd_type )                             :: dcd
 
-  integer, parameter :: it1_max = 400
-  integer, parameter :: it2_max = 1000
+  integer, parameter :: it1_max = 1000
+  integer, parameter :: it2_max = 2000
 
   real( kind=dp ), parameter ::  large = 1000000._dp
   real( kind=dp ), parameter :: minstp = 0.1_dp
