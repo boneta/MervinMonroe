@@ -4,12 +4,12 @@
 
   call dcd_initialize( dcd )
   call dcd_activate_write( &
-    file    = "dcd", &
+    file    = "MERVIN_COORD_OUT.dcd", &
     dcd     = dcd, &
     type    = "CORD", &
     natoms  = natoms, &
     nfixed  = nfixed, &
-    nframes = 1000, &
+    nframes = 2000, &
     qfix    = atmfix )
 
   acs_n = count( acs )

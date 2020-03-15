@@ -1,0 +1,128 @@
+#!/bin/bash
+
+#######################################################################
+##  surfer_grd                                                       ##
+#######################################################################
+#
+# creates a .grd file from a surface
+# only works for WSL
+#
+# by Sergio Boneta
+
+
+
+##  DEFAULT VARIABLES  ##############################################
+
+  xsize_def=0.05
+  ysize_def=0.05
+
+
+##  SCRIPT  ###########################################################
+
+  ## Checks if no arguments are in the input
+  if [ "$1" == "" ]; then
+    echo "ERROR: No input arguments. Use -h for help."
+    exit
+  fi
+
+  ## Input arguments assignment
+  workdir=`pwd`
+  while [ $# -gt 0 ]; do
+    arg="$1"
+    shift
+    case $arg in
+
+      "-f"|"--file" )         # configuration file
+        config_file=$1
+        shift
+        ;;
+
+      "-s" )                  # input surface file
+        surface_file=$1
+        shift
+        # check if coordenate file exists
+        if [[ ! -f "${workdir}/${surface_file}" ]]; then
+          echo "ERROR: surface file not found"
+          exit
+        fi
+        ;;
+
+      "-j" )                  # .job only
+        job_only=1
+        ;;
+
+      "-h"|"--help" )         # print help and exit
+        echo "············        surfer_grd       ·············"
+        echo
+        echo "USAGE:   surfer_grd -f file.mm -s surface.dat"
+        echo
+        echo "OPTIONS:                                     "
+        echo " -f | --file         configuration file"
+        echo " -s                  surface file"
+        echo " -j                  job only (creates files but do not launch)"
+        echo " -h | --help         print this help and exit"
+        echo
+        exit ;;
+      *)
+        echo "ERROR: Wrong option '$arg'. Use -h for help."
+        exit ;;
+    esac
+  done
+
+  job_only=${job_only:=0}
+  config_file=${config_file:=0}
+
+  ## Check for mandatory inputs
+  if [ ! -n "$surface_file" ]; then echo "ERROR: No surface file set"; exit; fi
+  # if [ ! -n "$config_file" ]; then echo "ERROR: No configuration file set"; exit; fi
+
+  name=${surface_file%.*}
+
+  if [ "$config_file" != "0" ]; then
+    ## Read config file
+    # remove comments (lines starting with #)
+    sed -i '/^#/d' ${workdir}/${config_file}
+    i_val=`sed -n 1p ${workdir}/${config_file}`
+    j_val=`sed -n 2p ${workdir}/${config_file}`
+    # read all atoms in an array starting in 0
+    qm_atoms=(`sed -n '/^&$/,/^&$/p' ${workdir}/${config_file} | sed '/^&/d'`)
+    # count number of atoms
+    qm_atoms_n=`echo "${#qm_atoms[@]} / 3" | bc`
+    # read constrains
+    constr1_line=`echo "$qm_atoms_n+5" | bc`
+    constr1=(`sed -n ${constr1_line}p ${workdir}/${config_file}`)
+    constr2_line=`echo "$constr1_line+1" | bc`
+    constr2=(`sed -n ${constr2_line}p ${workdir}/${config_file}`)
+
+    if [ "${constr1[0]}" == "m" ]; then
+      xsize=${constr1[10]:1}
+    elif [ "${constr1[0]}" == "d" ]; then
+      xsize=${constr1[7]:1}
+    fi
+    if [ "${constr2[0]}" == "m" ]; then
+      ysize=${constr2[10]:1}
+    elif [ "${constr2[0]}" == "d" ]; then
+      ysize=${constr2[7]:1}
+    fi
+  else
+    xsize=$xsize_def
+    ysize=$ysize_def
+  fi
+
+  ## Build surfer script
+  surfer_script=${name}.py
+  echo "import os, sys, win32com.client"                          > $surfer_script
+  echo "Surfer = win32com.client.Dispatch('Surfer.Application')"  >> $surfer_script
+  echo "InFile = os.path.abspath(sys.argv[1])"                    >> $surfer_script
+  echo "OutFile = os.path.splitext(InFile)[0]+'.grd'"             >> $surfer_script
+  echo "xplot = $xsize"                                           >> $surfer_script
+  echo "yplot = $ysize"                                           >> $surfer_script
+  echo "Surfer.GridData3(DataFile=InFile, Algorithm=\"localpolynomial\", xSize=xplot, ySize=yplot, ShowReport=False, OutGrid=OutFile)" >> $surfer_script
+
+  echo "python ${surfer_script} $surface_file" > pwshell.ps1
+
+  ## launch
+  if [ ${job_only} == "0" ]; then
+    powershell.exe -File "pwshell.ps1"
+    rm -f ${surfer_script} pwshell.ps1
+  fi

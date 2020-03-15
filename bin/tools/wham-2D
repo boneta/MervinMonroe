@@ -46,7 +46,7 @@ i_val = args.ij[0]
 j_val = args.ij[1]
 
 equilibration = 1
-acquisition = args.time*1000 + 1 
+acquisition = args.time*1000 + 1
 
 name1 = 'dat_x'
 name2 = 'dat_y'
@@ -141,12 +141,12 @@ def main():
         fd.close()
 
     # Write classic output
-    writeArray(pmf_out, outname + '.dat')
+    writeArray(pmf_out, 'all_' + outname + '.dat')
     writeArray(axes[0], 'axes0_' + outname + '.dat')
     writeArray(axes[1], 'axes1_' + outname + '.dat')
 
     # Write gnuplot output
-    with open('gnu_' + outname + '.dat', "wt") as f:
+    with open(outname + '-AM1.dat', "wt") as f:
         for i in xrange((i_val+1)*2):
             for j in xrange((j_val+1)*2):
                 f.write("%s\t%s\t%s\n" % (axes[0][i], axes[1][j], pmf_out[i][j]))
