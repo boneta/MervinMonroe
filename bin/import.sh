@@ -12,11 +12,11 @@
 ## USAGE:   mervinmonroe import [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   # name_def="sys"
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -30,22 +30,36 @@
     shift
     case $arg in
 
-      "-s"|"--system" )       # system name
+      -s|--system )               # system name
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
         ;;
 
-      "-f"|"--file" )         # files to import
+      -f|--files )                # files to import
         import_files=$@
         break
         ;;
 
-      # "-j" )                 # .job only
-      #   job_only=1
-      #   ;;
+      --remove )                  # remove system
+        if [ ! -n "$1" ]; then echo "ERROR: No system defined"; exit; fi
+        system=$1
+        system_dir=${mervinmonroe}/${systems_subfolder}/${system}
+        if [[ -d "$system_dir" ]]; then
+          read -p "Remove '$system' system? (y/n): " remove
+          remove=${remove,,}       # make it lowercase
+          if [ "$remove" == "y" ] || [ "$remove" == "yes" ]; then
+            echo "Removing."
+            rm -rf $system_dir
+          else
+            echo "Remove cancelled. Exiting."
+          fi
+        else
+          echo "ERROR: System '$system' could not be found"
+        fi
+        exit ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -58,7 +72,9 @@
         echo
         echo "OPTIONS:                                     "
         echo " -s | --system  <system name>                         set the system name"
-        echo " -f | --file  <.bin> <nofix.f90> <qm-atoms.f90>       files to import"
+        echo " -f | --files  <.bin> <nofix.f90> <qm-atoms.f90>      files to import"
+        echo
+        echo " --remove  <system name>                              remove system"
         echo " -h | --help                                          print this help and exit"
         echo
         exit ;;
@@ -78,15 +94,15 @@
     overwrite=${overwrite,,}       # make it lowercase
     if [ "$overwrite" == "y" ] || [ "$overwrite" == "yes" ]; then
       echo "Overwriting."
-      rm -rf $system_dir
     else
       echo "Import cancelled. Exiting."
       exit
     fi
+  else
+    mkdir $system_dir
   fi
 
-  mkdir $system_dir
-  cp $import_files $system_dir/
+  cp -f $import_files $system_dir/
 
   if [ "$?" == "0" ]; then
     echo "System '$system' imported correctly."

@@ -12,15 +12,14 @@
 ## USAGE:   mervinmonroe dynamics [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="dyn"
   temperature_def="298.15"
   qm_method_def="AM1"
-  # qm_charge_def="0"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -34,12 +33,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the PMF (optional)
+      -n|--name )                 # name of the PMF (optional)
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -50,12 +49,12 @@
         fi
         ;;
 
-      "-f"|"--file" )         # configuration file
+      -f|--file )                 # configuration file
         pmf_file=$1
         shift
         ;;
 
-      "-c"|"--coord" )        # coordinate files
+      -c|--coord )                # coordinate files
         coord_file=$1
         shift
         # check if coordenate file exists
@@ -65,7 +64,7 @@
         fi
         ;;
 
-      "-v"|"--vel" )          # velocities files
+      -v|--velocities )           # velocities files
         continuation=1
         vel_file=$1
         shift
@@ -76,30 +75,20 @@
         fi
         ;;
 
-      # "-t"|"--temperature" ) # temperature for the simulation
-      #   temperature=$1
-      #   shift
-      #   ;;
-
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      # "--charge" )            # QM charge
-      #   qm_charge=$1
-      #   shift
-      #   ;;
-
-      "--constr" )           # use constraints
+      --constr )                  # use constraints
         constr=1
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -111,17 +100,16 @@
         echo "USAGE:   mervinmonroe dynamics [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the PMF (def: $name_def)"
-        echo " -s | --system       set the system previously defined"
-        echo " -f | --file         configuration file"
-        echo " -c | --coord        coordinates file"
-        echo " -v | --vel          velocities file (continue production)"
-        echo " --method            QM method (def: $qm_method_def)"
-        echo " --constr            include constraints"
-        # echo " --charge            QM charge (def: $qm_charge_def)"
-        # echo " -t | --temperature  temperature bath (def: )"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -f | --file  <.mm>                configuration file"
+        echo " -c | --coord  <.crd>              intial coordinates file"
+        echo
+        echo " -n | --name  <name>               name of the localization (def: $name_def)"
+        echo " -v | --velocities  <.vel>         velocities file (continue production)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " --constr                          include constraints"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
@@ -133,8 +121,6 @@
   ## Default variables if not input
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
-  # temperature=${temperature:=$temperature_def}
-  # qm_charge=${qm_charge:=$qm_charge_def}
   continuation=${continuation:=0}
   constr=${constr:=0}
   job_only=${job_only:=0}

@@ -12,14 +12,13 @@
 ## USAGE:   mervinmonroe pes [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="pes"
   qm_method_def="AM1"
-  qm_charge_def="0"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -33,12 +32,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the PES (optional)
+      -n|--name )                 # name of the PES (optional)
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -49,12 +48,12 @@
         fi
         ;;
 
-      "-f"|"--file" )         # configuration file
+      -f|--file )                 # configuration file
         pes_file=$1
         shift
         ;;
 
-      "-c"|"--coord" )        # initial coordinate file
+      -c|--coord )                # initial coordinate file
         coord_file=$1
         shift
         # check if coordenate file exists
@@ -64,26 +63,21 @@
         fi
         ;;
 
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      # "--charge" )            # QM charge
-      #   qm_charge=$1
-      #   shift
-      #   ;;
-
-      "--process" )           # process ended PES
+      --process )                 # process ended PES
         process=1
         ;;
 
-      "-j" )                  # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -95,15 +89,15 @@
         echo "USAGE:   mervinmonroe pes [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the PES (def: $name_def)"
-        echo " -s | --system       set the system previously defined"
-        echo " -f | --file         configuration file"
-        echo " -c | --coord        intial coordinates file"
-        echo " --method            QM method (def: $qm_method_def)"
-        echo " --process           process ended PES files"
-        # echo " --charge            QM charge (def: $qm_charge_def)"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -f | --file  <.mm>                configuration file"
+        echo " -c | --coord  <.crd>              intial coordinates file"
+        echo
+        echo " -n | --name  <name>               name of the PES (def: $name_def)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " --process                         process ended PES files"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
@@ -115,7 +109,6 @@
   ## Default variables if not input
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
-  # qm_charge=${qm_charge:=$qm_charge_def}
   job_only=${job_only:=0}
 
   ## Process (if requested)

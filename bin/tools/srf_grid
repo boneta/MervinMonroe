@@ -53,14 +53,16 @@
 
       "-h"|"--help" )         # print help and exit
         echo "············        surfer_grd       ·············"
+        echo "            CAUTION: Only works for WSL "
         echo
-        echo "USAGE:   surfer_grd -f file.mm -s surface.dat"
+        echo "USAGE:   surfer_grd [options] -s surface.dat"
         echo
         echo "OPTIONS:                                     "
-        echo " -f | --file         configuration file"
-        echo " -s                  surface file"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s  <.dat>                        surface file"
+        echo
+        echo " -f | --file  <.mm>                configuration file"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
@@ -119,10 +121,11 @@
   echo "yplot = $ysize"                                           >> $surfer_script
   echo "Surfer.GridData3(DataFile=InFile, Algorithm=\"localpolynomial\", xSize=xplot, ySize=yplot, ShowReport=False, OutGrid=OutFile)" >> $surfer_script
 
-  echo "python ${surfer_script} $surface_file" > pwshell.ps1
+  # echo "python ${surfer_script} $surface_file" > pwshell.ps1
 
   ## launch
   if [ ${job_only} == "0" ]; then
-    powershell.exe -File "pwshell.ps1"
-    rm -f ${surfer_script} pwshell.ps1
+    python.exe $surfer_script $surface_file
+    # powershell.exe -File "pwshell.ps1"
+    rm -f ${surfer_script}
   fi

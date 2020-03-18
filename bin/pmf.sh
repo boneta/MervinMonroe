@@ -12,15 +12,14 @@
 ## USAGE:   mervinmonroe pmf [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="pmf"
-  temperature_def="298.15"
   qm_method_def="AM1"
-  qm_charge_def="0"
+  # temperature_def="298.15"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -34,12 +33,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the PMF (optional)
+      -n|--name )                 # name of the PMF (optional)
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -50,12 +49,12 @@
         fi
         ;;
 
-      "-f"|"--file" )         # configuration file
+      -f|--file )                 # configuration file
         pmf_file=$1
         shift
         ;;
 
-      "-c"|"--coord" )        # coordinate files location
+      -c|--coord )                # coordinate files location
         coord_folder="$1"
         shift
         # check if coordenate file exists
@@ -65,36 +64,26 @@
         fi
         ;;
 
-      # "-t"|"--temperature" ) # temperature for the simulation
-      #   temperature=$1
-      #   shift
-      #   ;;
-
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      # "--charge" )            # QM charge
-      #   qm_charge=$1
-      #   shift
-      #   ;;
-
-      "--check" )            # pmf check
+      --check )                   # pmf check
         echo "Finished: `grep "Coordinates written" *.log | wc -l`"
         echo "Pending: `grep -L "Coordinates written" *.log | wc -l`"
         exit
         ;;
 
-      "--wham" )             # whamize
+      --wham )                    # whamize
         wham=1
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -106,17 +95,16 @@
         echo "USAGE:   mervinmonroe pmf [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the PMF (def: $name_def)"
-        echo " -s | --system       set the system previously defined"
-        echo " -f | --file         configuration file"
-        echo " -c | --coord        coordinates folder"
-        echo " --method            QM method (def: $qm_method_def)"
-        echo " --check             check PMF progress"
-        echo " --wham              integrate with WHAM"
-        # echo " --charge            QM charge (def: $qm_charge_def)"
-        # echo " -t | --temperature  temperature bath (def: )"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -f | --file  <.mm>                configuration file"
+        echo " -c | --coord  </path>             coordinates folder from PES"
+        echo
+        echo " -n | --name  <name>               name of the PMF (def: $name_def)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " --check                           check PMF progress"
+        echo " --wham                            integrate with WHAM (in a new 'wham' folder)"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
@@ -129,7 +117,6 @@
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
   # temperature=${temperature:=$temperature_def}
-  # qm_charge=${qm_charge:=$qm_charge_def}
   job_only=${job_only:=0}
 
   ## Check for mandatory inputs
@@ -185,11 +172,12 @@
     echo " --name $name --path ../ --temp $temperature --conv 0.001 \\"  >> ${name}-wham.job
     echo " --time $production_ps --ij $i_val $j_val > ${name}-wham.out"  >> ${name}-wham.job
     echo "cd .."                                         >> ${name}-wham.job
-    cd ..
+    # launch wham
     if [ ${job_only} == "0" ]; then
       { qsub ${name}-wham.job ; } 2>/dev/null
       { sbatch ${name}-wham.job ; } 2>/dev/null
     fi
+    cd ..
     exit
   fi
 

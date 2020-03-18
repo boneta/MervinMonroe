@@ -12,15 +12,14 @@
 ## USAGE:   mervinmonroe correction [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="corr"
   functional_def="M062X"
   basis_def="6-31+G(d,p)"
-  # qm_charge_def="0"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -34,12 +33,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the PMF (optional)
+      -n|--name )                 # name of the PMF (optional)
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -50,12 +49,12 @@
         fi
         ;;
 
-      "-f"|"--file" )         # configuration file
+      -f|--file )                 # configuration file
         corr_file=$1
         shift
         ;;
 
-      "-c"|"--coord" )        # coordinate files location
+      -c|--coord )                # coordinate files location
         coord_folder="$1"
         shift
         # check if coordenate file exists
@@ -65,22 +64,17 @@
         fi
         ;;
 
-      "--functional" )        # DFT functional
+      --functional )              # DFT functional
         qm_method=$1
         shift
         ;;
 
-      "--basis" )             # Basis Set
+      --basis )                   # Basis Set
         qm_method=$1
         shift
         ;;
 
-      # "--charge" )            # QM charge
-      #   qm_charge=$1
-      #   shift
-      #   ;;
-
-      "--check" )            # check correction
+      --check )                   # check correction
         last_sp=`ls -d sp.* | tail -1`
         i_val=`echo $last_sp | awk -F "." '{print $2}'`
         j_val=`echo $last_sp | awk -F "." '{print $3}'`
@@ -102,7 +96,7 @@
         exit
         ;;
 
-      "--relaunch" )           # re-launch unfinished jobs
+      --relaunch )                # re-launch unfinished jobs
         last_sp=`ls -d sp.* | tail -1`
         i_val=`echo $last_sp | awk -F "." '{print $2}'`
         j_val=`echo $last_sp | awk -F "." '{print $3}'`
@@ -117,15 +111,15 @@
         exit
         ;;
 
-      "--process" )           # process ended correction
+      --process )                 # process ended correction
         process=1
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -137,18 +131,18 @@
         echo "USAGE:   mervinmonroe correction [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the PMF (def: $name_def)"
-        echo " -s | --system       set the system previously defined"
-        echo " -f | --file         configuration file"
-        echo " -c | --coord        coordinates folder"
-        echo " --functional        DFT functional (def: $functional_def)"
-        echo " --basis             basis set (def: $basis_def)"
-        echo " --check             display not finished jobs"
-        echo " --relaunch          launch not finished jobs"
-        echo " --process           process ended correction"
-        # echo " --charge            QM charge (def: $qm_charge_def)"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -f | --file  <.mm>                configuration file"
+        echo " -c | --coord  </path>             coordinates folder from PES"
+        echo
+        echo " -n | --name  <name>               name of the localization (def: $name_def)"
+        echo " --functional  <functional>        DFT functional (def: $functional_def)"
+        echo " --basis  <basis>                  basis set (def: $basis_def)"
+        echo " --check                           display not finished jobs"
+        echo " --relaunch                        relaunch failed jobs"
+        echo " --process                         process ended correction"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
@@ -161,7 +155,6 @@
   name=${name:=$name_def}
   functional=${functional:=$functional_def}
   basis=${basis:=$basis_def}
-  # qm_charge=${qm_charge:=$qm_charge_def}
   job_only=${job_only:=0}
 
   ## Process (if requested)

@@ -12,11 +12,7 @@
 ## USAGE:   mervinmonroe info [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
-
-  # name_def="sys"
-
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -30,7 +26,7 @@
     shift
     case $arg in
 
-      "-s"|"--system" )       # system
+      -s|--system )               # system
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -45,12 +41,12 @@
         exit
         ;;
 
-      "--sys-avail"|"-a" )    # list systems imported
+      --sys-avail|-a )            # list systems imported
         ls ${mervinmonroe}/${systems_subfolder} | cat
         exit
         ;;
 
-      "--template" )          # print template
+      --template )                # print template
         template=$1
         case $template in
           "qm-atoms.f90")
@@ -61,7 +57,7 @@
             cat ${mervinmonroe}/${templates_subfolder}/samples/pes.mervin
             exit
           ;;
-          "pel")
+          "scan")
             cat ${mervinmonroe}/${templates_subfolder}/samples/pel.mervin
             exit
           ;;
@@ -71,7 +67,7 @@
         esac
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -83,13 +79,13 @@
         echo "USAGE:   mervinmonroe info [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " -s | --system  <system>          show files of the specified system"
-        echo " --sys-avail | -a                 list imported systems"
-        echo " --template  <template name>      print a template sample:"
-        echo "                                    qm-atoms.f90    selection of atoms for the qm part"
-        echo "                                    pes             PES configuration file"
-        echo "                                    pel             PEL configuration file"
-        echo " -h | --help                      print this help and exit"
+        echo " -s | --system  <system>           show files of the specified system"
+        echo " --sys-avail | -a                  list imported systems"
+        echo " --template  <template name>       print a template sample:"
+        echo "                                     qm-atoms.f90    selection of atoms for the qm part"
+        echo "                                     pes             PES configuration file"
+        echo "                                     scan            SCAN configuration file"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)

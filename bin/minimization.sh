@@ -12,7 +12,7 @@
 ## USAGE:   mervinmonroe minimization [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="mini"
   qm_method_def="AM1"
@@ -23,7 +23,7 @@
   lbfgsb_tolerance_def=0.1
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -37,12 +37,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the minimization (optional)
+      -n|--name )                 # name of the minimization (optional)
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -53,7 +53,7 @@
         fi
         ;;
 
-      "-c"|"--coord" )        # initial coordinate file
+      -c|--coord )                # initial coordinate file
         coord_file=$1
         shift
         # check if coordenate file exists
@@ -63,36 +63,36 @@
         fi
         ;;
 
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      "--cg-steps" )         # Conjugate Gradient maximum steps
+      --cg-steps )                # Conjugate Gradient maximum steps
         cg_steps=$1
         shift
         ;;
 
-      "--cg-tolerance" )     # Conjugate Gradient convergence tolerance
+      --cg-tolerance )            # Conjugate Gradient convergence tolerance
         cg_tolerance=$1
         shift
         ;;
 
-      "--lbfgsb-steps" )     # L-BFGS-B maximum steps
+      --lbfgsb-steps )            # L-BFGS-B maximum steps
         lbfgsb_steps=$1
         shift
         ;;
 
-      "--lbfgsb-tolerance" ) # L-BFGS-B convergence tolerance
+      --lbfgsb-tolerance )        # L-BFGS-B convergence tolerance
         lbfgsb_tolerance=$1
         shift
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -104,16 +104,17 @@
         echo "USAGE:   mervinmonroe minimization [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name  <name>                        name of the minimization (def: $name_def)"
-        echo " -s | --system  <system>               set the system (must be already imported)"
-        echo " -c | --coord  <.crd>                  intial coordinates file"
-        echo " --method  <qm method>                 QM method (def: $qm_method_def)"
-        echo " --cg-steps  <#>                       Conjugate Gradient maximum steps (def: $cg_steps_def)"
-        echo " --cg-tolerance  <#>                   Conjugate Gradient convergence tolerance (def: $cg_tolerance_def)"
-        echo " --lbfgsb-steps  <#>                   L-BFGS-B maximum steps (def: $lbfgsb_steps_def)"
-        echo " --lbfgsb-tolerance  <#>               L-BFGS-B convergence tolerance (def: $lbfgsb_tolerance_def)"
-        echo " -j                           job only (creates files but do not launch)"
-        echo " -h | --help                  print this help and exit"
+        echo " -s | --system  <system>           set the system (must be already imported)"
+        echo " -c | --coord  <.crd>              intial coordinates file"
+        echo
+        echo " -n | --name  <name>               name of the minimization (def: $name_def)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " --cg-steps  <#>                   Conjugate Gradient maximum steps (def: $cg_steps_def)"
+        echo " --cg-tolerance  <#>               Conjugate Gradient convergence tolerance (def: $cg_tolerance_def)"
+        echo " --lbfgsb-steps  <#>               L-BFGS-B maximum steps (def: $lbfgsb_steps_def)"
+        echo " --lbfgsb-tolerance  <#>           L-BFGS-B convergence tolerance (def: $lbfgsb_tolerance_def)"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)

@@ -12,14 +12,14 @@
 ## USAGE:   mervinmonroe compile [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   locate_def="false"
   dynamo_v_def="std"
   FC="gfortran"
   Olevel="-O2"
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -33,21 +33,21 @@
     shift
     case $arg in
 
-      "-f" )                   # code file
+      -f )                        # code file
         code_file=$1
         shift
         ;;
 
-      "-v"|"--version" )       # Dynamo version
+      -v|--version )              # Dynamo version
         dynamo_v=$1
         shift
         ;;
 
-      "-l"|"--locate" )        # locate compilation
-        locate="true"
+      -l|--locate )               # locate compilation
+        locate=true
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -59,12 +59,13 @@
         echo "USAGE:   mervinmonroe compile [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " -f  <.f90>                       code to compile"
-        echo " -v | --version  <option>         Dynamo version to use (default: $dynamo_v_def)"
-        echo "                                    std          standard"
-        echo "                                    gauss        with gaussian"
-        echo " -l | --locate                    locate compilation (use 'panadero.f90')"
-        echo " -h | --help                      print this help and exit"
+        echo " -f  <.f90>                        code to compile"
+        echo
+        echo " -v | --version  <option>          Dynamo version to use (default: $dynamo_v_def)"
+        echo "                                     std          standard"
+        echo "                                     gauss        with gaussian"
+        echo " -l | --locate                     locate compilation (use 'panadero.f90')"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)

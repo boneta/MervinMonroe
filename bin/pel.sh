@@ -12,14 +12,13 @@
 ## USAGE:   mervinmonroe pel [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="pel"
   qm_method_def="AM1"
-  qm_charge_def="0"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -33,12 +32,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the PEL (optional)
+      -n|--name )                 # name of the PEL (optional)
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -49,12 +48,12 @@
         fi
         ;;
 
-      "-f"|"--file" )         # configuration file
+      -f|--file )                 # configuration file
         pel_file=$1
         shift
         ;;
 
-      "-c"|"--coord" )        # initial coordinate file
+      -c|--coord )                # initial coordinate file
         coord_file=$1
         shift
         # check if coordenate file exists
@@ -64,34 +63,35 @@
         fi
         ;;
 
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
         echo "Version $mervinmonroe_version"
         echo
         echo
-        echo "··············        pel       ···············"
+        echo "··············       scan       ···············"
         echo
-        echo "USAGE:   mervinmonroe pel [options]"
+        echo "USAGE:   mervinmonroe scan [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the pel (def: $name_def)"
-        echo " -s | --system       set the system previously defined"
-        echo " -f | --file         configuration file"
-        echo " -c | --coord        intial coordinates file"
-        echo " --method            QM method (def: $qm_method_def)"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -f | --file  <.mm>                configuration file"
+        echo " -c | --coord  <.crd>              intial coordinates file"
+        echo
+        echo " -n | --name  <name>               name of the scan (def: $name_def)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)

@@ -12,7 +12,7 @@
 ## USAGE:   mervinmonroe locate [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="locate"
   qm_method_def="AM1"
@@ -21,7 +21,7 @@
   basis_def="6-31+G(d,p)"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -35,12 +35,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the location
+      -n|--name )                 # name of the location
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -51,12 +51,7 @@
         fi
         ;;
 
-      # "-f"|"--file" )         # configuration file
-      #   pel_file=$1
-      #   shift
-      #   ;;
-
-      "-c"|"--coord" )        # initial coordinate file
+      -c|--coord )                # initial coordinate file
         coord_file=$1
         shift
         # check if coordenate file exists
@@ -66,38 +61,39 @@
         fi
         ;;
 
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      "-ts" )                # TS - Saddle point search
+      -ts )                       # TS - Saddle point search
         ts_search=".true."
         ;;
 
-      "-gauss" )             # Gaussian calc
+      -gauss )                    # Gaussian calc
         gauss_loc="-gauss"
         ;;
 
-      "--functional" )        # DFT functional
+      --functional )              # DFT functional
         qm_method=$1
         shift
         ;;
 
-      "--basis" )             # Basis Set
+      --basis )                   # Basis Set
         qm_method=$1
         shift
         ;;
 
-      "-irc" )               # IRC and locate after
+      -irc )                      # IRC and locate after
+        ts_search=".true."
         irc=1
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -109,18 +105,18 @@
         echo "USAGE:   mervinmonroe locate [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name              name of the location (def: $name_def)"
-        echo " -s | --system       set the system previously defined"
-        # echo " -f | --file         configuration file"
-        echo " -c | --coord        intial coordinates file"
-        echo " --method            QM method (def: $qm_method_def)"
-        echo " -ts                 TS search"
-        echo " -irc                IRC and locate jobs after"
-        echo " -gauss              use Gaussian"
-        echo " --functional        DFT functional (def: $functional_def)"
-        echo " --basis             basis set (def: $basis_def)"
-        echo " -j                  job only (creates files but do not launch)"
-        echo " -h | --help         print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -c | --coord  <.crd>              intial coordinates file"
+        echo
+        echo " -n | --name  <name>               name of the localization (def: $name_def)"
+        echo " -ts                               TS search"
+        echo " -irc                              IRC and locate jobs afterwards (implies ts)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " -gauss                            use Gaussian"
+        echo " --functional  <functional>        DFT functional (def: $functional_def)"
+        echo " --basis  <basis>                  basis set (def: $basis_def)"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
@@ -140,7 +136,6 @@
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
-  # if [ ! -n "$pel_file" ]; then echo "ERROR: No configuration file set"; exit; fi
   if [ ! -n "$coord_file" ]; then echo "ERROR: No initial coordinates set"; exit; fi
 
   ## Build the f90 file
@@ -162,10 +157,8 @@
   # set output coordinates
   if [ "$ts_search" == ".true." ]; then
     sed -i "s/MERVIN_COORD_OUT/${name}-ts/g" ${workdir}/${name}.f90
-    # sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-ts/g" ${workdir}/${name}.f90
   else
     sed -i "s/MERVIN_COORD_OUT/${name}-loc/g" ${workdir}/${name}.f90
-    # sed -i "s/MERVIN_COORD_OUT/${coord_file%.*}-loc/g" ${workdir}/${name}.f90
   fi
 
   ## Compile and with_gaussian

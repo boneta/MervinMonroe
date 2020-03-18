@@ -1,21 +1,34 @@
 #!/bin/bash
 
-##  USER VARIABLES  #################################################
+#################################################
+###               MERVIN MONROE               ###
+#################################################
+#                 configuration                 #
+#################################################
 
-  export dynamo_std="${mervinmonroe}/bin/fDynamo/dynamo-OPLS"
-  export dynamo_gauss="${mervinmonroe}/bin/fDynamo/dynamo-gaussian"
+#                by Sergio Boneta
 
 
+##  MERVIN VARIABLES  #################################################
+
+  export mervinmonroe=$(dirname ${BASH_SOURCE[0]})
+  export PATH=$PATH:$mervinmonroe
+
+##  USER VARIABLES  ###################################################
+
+  export dynamo_std=${mervinmonroe}/bin/fDynamo/dynamo-OPLS
+  export dynamo_gauss=${mervinmonroe}/bin/fDynamo/dynamo-gaussian
 
 
-
-
-# Execute only once (the first time)
-if [ "true" == "true" ]; then
+##  FIRST TIME CONFIGURATION  #########################################
+# Check or create crucial folders. Compile fDynamo.
+# Execute only once (the first time). Modify to "yes" to execute again.
+mervin_initializate=yes
+if [ "$mervin_initializate" == "yes" ]; then
   origin_dir=`pwd`
   cd $mervinmonroe
   # Modify '.mervinconfig' to be executed only once
-  sed -i "s/true/false/" ${mervinmonroe}/.mervinconfig
+  sed -z -i "s/initializate=yes/initializate=no/" ${mervinmonroe}/.mervinconfig
   # Create systems folder
   if [[ ! -d "systems" ]]; then
     mkdir systems
@@ -35,4 +48,200 @@ if [ "true" == "true" ]; then
   cd ${dynamo_gauss}/src
   make -f makefile
   cd $origin_dir
+  echo "########  COMPILATION FINISHED  ########"
 fi
+
+
+##  AUTOCOMPLETION  ###################################################
+
+_mervin_compl() {
+  local i c m
+  local IFS=$'\n'
+  COMPREPLY=()
+  unset COMP_WORDS[0]
+  for ((i=1;i<COMP_CWORD;++i)) ; do
+    [[ "${COMP_WORDS[i]}" != -* ]] && break
+    unset COMP_WORDS[i]
+  done
+  if (( i == COMP_CWORD )); then
+    c=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=( $(compgen -S ' ' -W $'-h\n--help\ninfo\nupdate\nimport\ncompile\nminimization\npel\nscan\npes\nlocate\nirc\npmf\ncorrection\ndynamics\ntools' -- $c) )
+    return 0
+  fi
+  m=${COMP_WORDS[i]}
+  COMP_WORDS=( "${COMP_WORDS[@]}" )
+  COMP_CWORD=$((COMP_CWORD-i))
+  case "$m" in
+    info) _mervin_info_compl ;;
+    import) _mervin_import_compl ;;
+    compile|c) _mervin_compile_compl ;;
+    minimization|mini) _mervin_minimization_compl ;;
+    scan|pel) _mervin_pel_compl ;;
+    pes) _mervin_pes_compl ;;
+    locate) _mervin_locate_compl ;;
+    irc) _mervin_irc_compl ;;
+    pmf) _mervin_pmf_compl ;;
+    correction|corr) _mervin_correction_compl ;;
+    dynamics|dyn) _mervin_dynamics_compl ;;
+    tools|t) _mervin_tools_compl;;
+  esac }
+
+_mervin_info_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-s\n--system\n-a\n--sys-avail\n--template' -- $c)); return 0; fi
+  case "$p" in
+    --template) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'qm-atoms.f90\npes\nscan' -- $c));;
+  esac }
+
+_mervin_import_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-s\n--system\n-f\n--files\n--remove' -- $c)); return 0; fi
+  case "$p" in
+    --remove) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -f|--files) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*@(.bin|.f90)' -f -- $c ; compgen -S '/' -d $c));;
+  esac }
+
+_mervin_compile_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-f\n--system\n-v\n--version\n-l\n--locate' -- $c)); return 0; fi
+  case "$p" in
+    -f) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.f90' -f -- $c ; compgen -S '/' -d $c));;
+    -v|--version) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'std\ngauss' -- $c));;
+  esac }
+
+_mervin_minimization_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n--method\n--cg-steps\n--cg-tolerance\n--lbfgsb-steps\n--lbfgsb-tolerance\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+  esac }
+
+_mervin_pel_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n--method\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    -f|--file) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.mm' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+  esac }
+
+_mervin_pes_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n--method\n--process\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    -f|--file) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.mm' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+  esac }
+
+_mervin_locate_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n--method\n-ts\n-gauss\n--functional\n--basis\n-irc\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+    --functional) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'B3LYP\nCAM-B3LYP\nB3PW91\nO3LYP\nM06\nM06L\nM06HF\nM062X\nB97D3' -- $c));;
+  esac }
+
+_mervin_irc_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n--method\n-d\n--direction\n-he\n--hessian\n-l\n--locate\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+    -d|--direction) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'full\nback\nfor' -- $c));;
+  esac }
+
+_mervin_pmf_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n--method\n--check\n--wham\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S '/' -d $c));;
+    -f|--file) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.mm' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+  esac }
+
+_mervin_correction_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n--functional\n--basis\n--check\n--relaunch\n--process\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S '/' -d $c));;
+    -f|--file) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.mm' -f -- $c ; compgen -S '/' -d $c));;
+    --functional) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'B3LYP\nCAM-B3LYP\nB3PW91\nO3LYP\nM06\nM06L\nM06HF\nM062X\nB97D3' -- $c));;
+  esac }
+
+_mervin_dynamics_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
+  local p=${COMP_WORDS[COMP_CWORD-n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n-v\n--velocities\n--method\n--constr\n-j' -- $c)); return 0; fi
+  case "$p" in
+    -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
+    -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    -f|--file) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.mm' -f -- $c ; compgen -S '/' -d $c));;
+    -v|--velocities) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.vel' -f -- $c ; compgen -S '/' -d $c));;
+    --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+  esac }
+
+_mervin_tools_compl() {
+  local IFS=$'\n' ; local c=${COMP_WORDS[COMP_CWORD]}; local n
+  for ((n=1;n<COMP_CWOR;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == * ]] && break ; done
+  local p=${COMP_WORDS[n]}
+  COMPREPLY=()
+  if (( $COMP_CWORD <= 1 )) ; then COMPREPLY=( $(compgen -S ' '  -W "$(ls $mervinmonroe/bin/tools | grep -v "ecmb.*")" -- $c)); return 0; fi
+  # echo $p
+  case "$p" in
+    tst) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'G\nk' -- $c));;
+    crd2pdb) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c));;
+    pdb2crd) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.pdb' -f -- $c));;
+    frdump) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--fr\n--crd\n--dcd' -- $c ; compgen -S ' ' -fd -- $c));;
+    point) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n-f\n--pes\n-c' -- $c ; compgen -S ' ' -fd -- $c));;
+    relative) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--val' -- $c ; compgen -S ' ' -fd -- $c));;
+    trimmer) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--pes' -- $c ; compgen -S ' ' -fd -- $c));;
+    srf_grid) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n-s\n-f\n-j' -- $c ; compgen -S ' ' -fd -- $c));;
+    correct-2D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--name\n--corr_name\n--pes\n--pmf\n--corr' -- $c ; compgen -S ' ' -fd -- $c));;
+    wham-1D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--out\n--temp\n--conv\n--dats' -- $c ; compgen -S ' ' -fd -- $c));;
+    wham-2D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--name\n--path\n--temp\n--conv\n--ij\n--time' -- $c ; compgen -S ' ' -fd -- $c));;
+    *) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -fd -- $c));;
+  esac }
+
+complete -o nospace -F _mervin_compl mervin mervinmonroe

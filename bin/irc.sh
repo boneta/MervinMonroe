@@ -12,14 +12,14 @@
 ## USAGE:   mervinmonroe irc [options]
 
 
-##  DEFAULT VARIABLES  ##############################################
+##  DEFAULT VARIABLES  ################################################
 
   name_def="IRC"
   qm_method_def="AM1"
   irc_direction_def="full"
 
 
-##  SCRIPT  #########################################################
+##  SCRIPT  ###########################################################
 
   ## Checks if no arguments are in the input
   if [ "$1" == "" ]; then
@@ -33,12 +33,12 @@
     shift
     case $arg in
 
-      "--name" )              # name of the location
+      -n|--name )                 # name of the location
         name=$1
         shift
         ;;
 
-      "-s"|"--system" )       # system selection
+      -s|--system )               # system selection
         system=$1
         system_dir=${mervinmonroe}/${systems_subfolder}/${system}
         shift
@@ -49,12 +49,7 @@
         fi
         ;;
 
-      # "-f"|"--file" )         # configuration file
-      #   pel_file=$1
-      #   shift
-      #   ;;
-
-      "-c"|"--coord" )        # initial coordinate file
+      -c|--coord )                # initial coordinate file
         coord_file=$1
         shift
         # check if coordenate file exists
@@ -64,30 +59,30 @@
         fi
         ;;
 
-      "--method" )            # QM method
+      --method )                  # QM method
         qm_method=$1
         shift
         ;;
 
-      "-d"|"--direction" )   # IRC direction
+      -d|--direction )            # IRC direction
         irc_direction=$1
         shift
         ;;
 
-      "-he"|"--hessian" )    # hessian dump
+      -he|--hessian )             # hessian dump
         hessian_dump=$1
         shift
         ;;
 
-      "-l"|"--locate" )      # locate too
+      -l|--locate )               # locate too
         locate=1
         ;;
 
-      "-j" )                 # .job only
+      -j )                        # .job only
         job_only=1
         ;;
 
-      "-h"|"--help" )         # print help and exit
+      -h|--help )                 # print help and exit
         echo "---------------  MERVIN MONROE  ---------------"
         echo "     A lazy interface for fDynamo software     "
         echo
@@ -99,18 +94,19 @@
         echo "USAGE:   mervinmonroe irc [options]"
         echo
         echo "OPTIONS:                                     "
-        echo " --name  <name>                 name of the irc (def: $name_def)"
-        echo " -s | --system  <system>        set the system previously defined"
-        echo " -c | --coord  <.crd>           intial coordinates file"
-        echo " --method  <qm method>          QM method (def: $qm_method_def)"
-        echo " -d | --direction  <>           direction of IRC (def: $irc_direction_def)"
-        echo "                                  full          back and forward"
-        echo "                                  back          only back (-1)"
-        echo "                                  for           only forward (1)"
-        echo " -he | --hessian                hessian TS file to use (update.dump)"
-        echo " -l | --locate                  launch locate jobs after IRC"
-        echo " -j                             job only (creates files but do not launch)"
-        echo " -h | --help                    print this help and exit"
+        echo " -s | --system  <system>           set the system previously defined"
+        echo " -c | --coord  <.crd>              intial coordinates file"
+        echo
+        echo " -n | --name  <name>               name of the irc (def: $name_def)"
+        echo " --method  <qm method>             QM method (def: $qm_method_def)"
+        echo " -d | --direction  <dir>           direction of IRC (def: $irc_direction_def)"
+        echo "                                     full          back and forward"
+        echo "                                     back          only back (-1)"
+        echo "                                     for           only forward (1)"
+        echo " -l | --locate                     launch locate jobs after IRC"
+        echo " -he | --hessian <hessian>         hessian TS file to use (i.e.: update.dump)"
+        echo " -j                                job only (creates files but do not launch)"
+        echo " -h | --help                       print this help and exit"
         echo
         exit ;;
       *)
