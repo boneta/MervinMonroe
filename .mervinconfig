@@ -28,7 +28,7 @@ if [ "$mervin_initializate" == "yes" ]; then
   origin_dir=`pwd`
   cd $mervinmonroe
   # Modify '.mervinconfig' to be executed only once
-  sed -z -i "s/initializate=yes/initializate=no/" ${mervinmonroe}/.mervinconfig
+  sed -i "s/initializate=yes/initializate=no/" ${mervinmonroe}/.mervinconfig
   # Create systems folder
   if [[ ! -d "systems" ]]; then
     mkdir systems
