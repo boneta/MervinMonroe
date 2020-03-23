@@ -1,0 +1,12 @@
+
+# Dynamo binaries
+bin/fDynamo/dynamo-gaussian/src/*.mod
+bin/fDynamo/dynamo-gaussian/src/*.o
+bin/fDynamo/dynamo-gaussian/src/*.a
+bin/fDynamo/dynamo-OPLS/modules/*
+bin/fDynamo/dynamo-OPLS/src/*.o
+bin/fDynamo/dynamo-OPLS/*.a
+
+# panadero binaries
+templates/compile/panadero.o
+templates/compile/panadero.mod

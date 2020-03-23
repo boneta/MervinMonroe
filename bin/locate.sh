@@ -179,6 +179,8 @@
   ## Build the job
   cp ${mervinmonroe}/${templates_subfolder}/locate/jobber  ${workdir}/${name}.job
   sed -i "s/MERVIN_JOBNAME/${system}-${name}-${coord_file%.*}/g" ${workdir}/${name}.job
+  sed -i "s/MERVIN_Q_SGE/${queue_sge}/g" ${workdir}/${name}.job
+  sed -i "s/MERVIN_Q_SLURM/${queue_slurm}/g" ${workdir}/${name}.job
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.job
   if [ "$gauss_loc" == "-gauss" ]; then
     sed -i "s/MERVIN_CORES_SGE/$ -pe mp8 8/g" ${workdir}/${name}.job

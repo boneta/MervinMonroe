@@ -1,19 +1,19 @@
 #!/bin/bash
 
 ## SGE
-#$ -q BIFIZCAM
 #$ -N MERVIN_JOBNAME
-#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -q MERVIN_Q_SGE
+#$ -e $HOME/msg/MERVIN_JOBNAME.msg
 #$ -R yes
 
 ## SLURM
 #SBATCH -J MERVIN_JOBNAME
-#SBATCH -o /home/boneta/msg/MERVIN_JOBNAME.msg
+#SBATCH -p MERVIN_Q_SLURM
+#SBATCH -o $HOME/msg/MERVIN_JOBNAME.msg
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-#SBATCH -p bifi
 
-workdir="MERVIN_WORKDIR"
+workdir=MERVIN_WORKDIR
 i_side=MERVIN_I
 j_side=MERVIN_J
 
@@ -31,25 +31,21 @@ for i in `seq -w 0 $i_side`; do
 
     mkdir $filename
     cd $filename
-    # ln -s ../MERVIN_BIN MERVIN_BIN
-    # ln -s ../nofix.f90 nofix.f90
-    # ln -s ../with_gaussian.f90 with_gaussian.f90
-    # ln -s ../MERVIN_CRD_FOLDER/pes.${i}.${j}.crd pes.${i}.${j}.crd
 
     echo "#!/bin/bash "                                  > ${jobfile}
     echo ""                                              >> ${jobfile}
-    echo "#$ -q BIFIZCAM "                               >> ${jobfile}
     echo "#$ -N $filename "                              >> ${jobfile}
-    echo "#$ -e /home/boneta/msg/${filename}.msg "       >> ${jobfile}
+    echo "#$ -q MERVIN_Q_SGE "                           >> ${jobfile}
+    echo "#$ -e $HOME/msg/${filename}.msg "              >> ${jobfile}
     echo "#$ -R yes "                                    >> ${jobfile}
     echo "#$ -pe mp8 8 "                                 >> ${jobfile}
     echo "#$ -l h='!node009.cm.cluster' "                >> ${jobfile}
     echo ""                                              >> ${jobfile}
     echo "#SBATCH -J $filename "                         >> ${jobfile}
-    echo "#SBATCH -o /home/boneta/msg/${filename}.msg "  >> ${jobfile}
+    echo "#SBATCH -p MERVIN_Q_SLURM "                    >> ${jobfile}
+    echo "#SBATCH -o $HOME/msg/${filename}.msg "         >> ${jobfile}
     echo "#SBATCH -N 1 "                                 >> ${jobfile}
     echo "#SBATCH --ntasks-per-node=8 "                  >> ${jobfile}
-    echo "#SBATCH -p bifi "                              >> ${jobfile}
     echo ""                                              >> ${jobfile}
     echo "cd $workdir/$filename"                         >> ${jobfile}
     echo "echo \"${i} ${j}\" > ${inputfile}"             >> ${jobfile}

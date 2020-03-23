@@ -1,19 +1,19 @@
 #!/bin/bash
 
 ## SGE
-#$ -q BIFIZCAM
 #$ -N MERVIN_JOBNAME
-#$ -e /home/boneta/msg/MERVIN_JOBNAME.msg
+#$ -q MERVIN_Q_SGE
+#$ -e $HOME/msg/MERVIN_JOBNAME.msg
 #$ -R yes
 #MERVIN_CORES_SGE
 
 ## SLURM
 #SBATCH -J MERVIN_JOBNAME
-#SBATCH -o /home/boneta/msg/MERVIN_JOBNAME.msg
+#SBATCH -p MERVIN_Q_SLURM
+#SBATCH -o $HOME/msg/MERVIN_JOBNAME.msg
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=MERVIN_CORES_SLURM
-#SBATCH -p bifi
 
-workdir="MERVIN_WORKDIR"
+workdir=MERVIN_WORKDIR
 cd $workdir
 ./a.out > MERVIN_JOBNAME.log

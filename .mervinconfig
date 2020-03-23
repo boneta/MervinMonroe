@@ -16,6 +16,9 @@
 
 ##  USER VARIABLES  ###################################################
 
+
+  export queue_sge=BIFIZCAM
+  export queue_slurm=bifi
   export dynamo_std=${mervinmonroe}/bin/fDynamo/dynamo-OPLS
   export dynamo_gauss=${mervinmonroe}/bin/fDynamo/dynamo-gaussian
 
@@ -71,7 +74,7 @@ _mervin_compl() {
   done
   if (( i == COMP_CWORD )); then
     c=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=( $(compgen -S ' ' -W $'-h\n--help\ninfo\nupdate\nimport\ncompile\nminimization\npel\nscan\npes\nlocate\nirc\npmf\ncorrection\ndynamics\ntools' -- $c) )
+    COMPREPLY=( $(compgen -S ' ' -W $'-h\n--help\n-q\n--queue\ninfo\nupdate\nimport\ncompile\nminimization\npel\nscan\npes\nlocate\nirc\npmf\ncorrection\ndynamics\ntools' -- $c) )
     return 0
   fi
   m=${COMP_WORDS[i]}
@@ -90,6 +93,7 @@ _mervin_compl() {
     correction|corr) _mervin_correction_compl ;;
     dynamics|dyn) _mervin_dynamics_compl ;;
     tools|t) _mervin_tools_compl;;
+    *) _mervin_compl;;
   esac }
 
 _mervin_info_compl() {

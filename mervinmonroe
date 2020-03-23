@@ -28,7 +28,7 @@
   export scripts_subfolder="bin"
   export templates_subfolder="templates"
 
-  export mervinmonroe_version="0.3.0 - 18032020"
+  export mervinmonroe_version="0.3.1 - 23032020"
 
 ##  MAIN  #############################################################
   ## Execute configuration file
@@ -47,6 +47,14 @@
   fi
 
   ## Input arguments assignment
+  # queue selection
+  if [ "$1" == "-q" ] || [ "$1" == "--queue" ]; then
+    export queue_sge=$2
+    export queue_slurm=$2
+    shift; shift
+  fi
+
+  # subscript execution
   subscript="$1"
   shift
   case $subscript in
