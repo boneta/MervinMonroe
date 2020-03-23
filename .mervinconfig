@@ -20,6 +20,12 @@
   export dynamo_gauss=${mervinmonroe}/bin/fDynamo/dynamo-gaussian
 
 
+##  NOHUP LAUNCHER  ###################################################
+# uncomment to set 'qsub' command as launcher in the background (nohup &)
+# qsub() { nohup bash $1 & }
+# export -f qsub
+
+
 ##  FIRST TIME CONFIGURATION  #########################################
 # Check or create crucial folders. Compile fDynamo.
 # Execute only once (the first time). Modify to "yes" to execute again.
