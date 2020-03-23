@@ -3,13 +3,13 @@
 ## SGE
 #$ -N MERVIN_JOBNAME
 #$ -q MERVIN_Q_SGE
-#$ -e $HOME/msg/MERVIN_JOBNAME.msg
+#$ -e MERVIN_MSG_FOLDER/MERVIN_JOBNAME.msg
 #$ -R yes
 
 ## SLURM
 #SBATCH -J MERVIN_JOBNAME
 #SBATCH -p MERVIN_Q_SLURM
-#SBATCH -o $HOME/msg/MERVIN_JOBNAME.msg
+#SBATCH -o MERVIN_MSG_FOLDER/MERVIN_JOBNAME.msg
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
 
@@ -43,13 +43,13 @@ for i in `seq -w 0 ${i_side}`; do
   echo ""                                              >> ${jobfile}
   echo "#$ -N $filename "                              >> ${jobfile}
   echo "#$ -q MERVIN_Q_SGE "                           >> ${jobfile}
-  echo "#$ -e $HOME/msg/${filename}.msg "              >> ${jobfile}
+  echo "#$ -e MERVIN_MSG_FOLDER/${filename}.msg "              >> ${jobfile}
   echo "#$ -R yes "                                    >> ${jobfile}
   echo "#$ -l h='!node009.cm.cluster' "                >> ${jobfile}
   echo ""                                              >> ${jobfile}
   echo "#SBATCH -J $filename "                         >> ${jobfile}
   echo "#SBATCH -p MERVIN_Q_SLURM "                    >> ${jobfile}
-  echo "#SBATCH -o $HOME/msg/${filename}.msg "         >> ${jobfile}
+  echo "#SBATCH -o MERVIN_MSG_FOLDER/${filename}.msg "         >> ${jobfile}
   echo "#SBATCH -N 1 "                                 >> ${jobfile}
   echo "#SBATCH --ntasks-per-node=1 "                  >> ${jobfile}
   echo ""                                              >> ${jobfile}

@@ -156,14 +156,14 @@
     echo ""                                              >> ${name}-wham.job
     echo "#$ -N $name-wham "                             >> ${name}-wham.job
     echo "#$ -q ${queue_sge} "                           >> ${name}-wham.job
-    echo "#$ -e $HOME/msg/$name-wham.msg "               >> ${name}-wham.job
+    echo "#$ -e ${msg_folder}/$name-wham.msg "           >> ${name}-wham.job
     echo "#$ -R yes "                                    >> ${name}-wham.job
     echo "#$ -pe mp8 8 "                                 >> ${name}-wham.job
     echo "#$ -l h='!node009.cm.cluster' "                >> ${name}-wham.job
     echo ""                                              >> ${name}-wham.job
     echo "#SBATCH -J $name-wham "                        >> ${name}-wham.job
     echo "#SBATCH -p ${queue_slurm} "                    >> ${name}-wham.job
-    echo "#SBATCH -o $HOME/msg/$name-wham.msg "          >> ${name}-wham.job
+    echo "#SBATCH -o ${msg_folder}/$name-wham.msg "      >> ${name}-wham.job
     echo "#SBATCH -N 1 "                                 >> ${name}-wham.job
     echo "#SBATCH --ntasks-per-node=8 "                  >> ${name}-wham.job
     echo ""                                              >> ${name}-wham.job
@@ -268,6 +268,7 @@
   ## Build the jobber
   cp ${mervinmonroe}/${templates_subfolder}/pmf/jobber  ${workdir}/${name}.jobber
   sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.jobber
+  sed -i "s/MERVIN_MSG_FOLDER/${msg_folder}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_Q_SGE/${queue_sge}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_Q_SLURM/${queue_slurm}/g" ${workdir}/${name}.jobber
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber

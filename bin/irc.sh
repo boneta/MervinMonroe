@@ -159,6 +159,7 @@
         ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}-${dir}.f90
         cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}-${dir}.job
         sed -i "s/MERVIN_JOBNAME/${system}-${name}-${dir}/g" ${name}-${dir}.job
+        sed -i "s/MERVIN_MSG_FOLDER/${msg_folder}/g" ${name}-${dir}.job
         sed -i "s/MERVIN_Q_SGE/${queue_sge}/g" ${name}-${dir}.job
         sed -i "s/MERVIN_Q_SLURM/${queue_slurm}/g" ${name}-${dir}.job
         sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}-${dir}.job
@@ -191,6 +192,7 @@
       ${mervinmonroe}/${scripts_subfolder}/compile.sh --version std -f ${name}.f90
       cp ${mervinmonroe}/${templates_subfolder}/irc/jobber  ${name}.job
       sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${name}.job
+      sed -i "s/MERVIN_MSG_FOLDER/${msg_folder}/g" ${name}.job
       sed -i "s/MERVIN_Q_SGE/${queue_sge}/g" ${name}.job
       sed -i "s/MERVIN_Q_SLURM/${queue_slurm}/g" ${name}.job
       sed -i "s|MERVIN_WORKDIR|`pwd`|g" ${name}.job

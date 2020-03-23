@@ -147,6 +147,8 @@
       echo " correction | corr                 correction calculation"
       echo " dynamics | dyn                    molecular dynamics"
       echo " tools | t                         tools (miscellaneous)"
+      echo
+      echo " -q | --queue  <queue name>        set queue"
       echo " -h | --help                       print this help and exit"
       echo
       exit ;;

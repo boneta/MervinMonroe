@@ -253,6 +253,7 @@
   ## Build the jobber
   cp ${mervinmonroe}/${templates_subfolder}/dynamics/jobber  ${workdir}/${name}.job
   sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.job
+  sed -i "s/MERVIN_MSG_FOLDER/${msg_folder}/g" ${workdir}/${name}.job
   sed -i "s/MERVIN_Q_SGE/${queue_sge}/g" ${workdir}/${name}.job
   sed -i "s/MERVIN_Q_SLURM/${queue_slurm}/g" ${workdir}/${name}.job
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.job

@@ -19,6 +19,7 @@
 
   export queue_sge=BIFIZCAM
   export queue_slurm=bifi
+  export msg_folder=/home/boneta/msg
   export dynamo_std=${mervinmonroe}/bin/fDynamo/dynamo-OPLS
   export dynamo_gauss=${mervinmonroe}/bin/fDynamo/dynamo-gaussian
 
