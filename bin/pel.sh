@@ -68,6 +68,10 @@
         shift
         ;;
 
+      --process )                 # process ended PEL
+        process=1
+        ;;
+
       -j )                        # .job only
         job_only=1
         ;;
@@ -104,6 +108,14 @@
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
   job_only=${job_only:=0}
+
+  ## Process (if requested)
+  if [ "$process" == 1 ]; then
+    mkdir pel-crd
+    mv pel.*.crd pel-crd/
+    cp ep.XX.out ${name}-${qm_method}.dat
+    exit
+  fi
 
   ## Check for mandatory inputs
   if [ ! -n "$system" ]; then echo "ERROR: No system set"; exit; fi
@@ -188,7 +200,7 @@
   ## Build the jobber
   cp ${mervinmonroe}/${templates_subfolder}/pel/jobber  ${workdir}/${name}.jobber
   sed -i "s/MERVIN_JOBNAME/${system}-${name}/g" ${workdir}/${name}.jobber
-  sed -i "s|MERVIN_MSG_FOLDER|${msg_folder}|g" ${workdir}/${name}.jobbber
+  sed -i "s|MERVIN_MSG_FOLDER|${msg_folder}|g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_Q_SGE/${queue_sge}/g" ${workdir}/${name}.jobber
   sed -i "s/MERVIN_Q_SLURM/${queue_slurm}/g" ${workdir}/${name}.jobber
   sed -i "s|MERVIN_WORKDIR|${workdir}|g" ${workdir}/${name}.jobber

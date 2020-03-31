@@ -28,7 +28,7 @@
   export scripts_subfolder="bin"
   export templates_subfolder="templates"
 
-  export mervinmonroe_version="0.3.1 - 23032020"
+  export mervinmonroe_version="0.3.2 - 31032020"
 
 ##  MAIN  #############################################################
   ## Execute configuration file

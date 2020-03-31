@@ -26,7 +26,7 @@
 
 ##  NOHUP LAUNCHER  ###################################################
 # uncomment to set 'qsub' command as launcher in the background (nohup &)
-# qsub() { nohup bash $1 & }
+# function qsub() { nohup bash $1 & }
 # export -f qsub
 
 
@@ -146,7 +146,7 @@ _mervin_pel_compl() {
   for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
   local p=${COMP_WORDS[COMP_CWORD-n]}
   COMPREPLY=()
-  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n--method\n-j' -- $c)); return 0; fi
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-f\n--file\n-c\n--coord\n--method\n--process\n-j' -- $c)); return 0; fi
   case "$p" in
     -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
     -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;

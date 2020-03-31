@@ -8,7 +8,7 @@ for element in sys.argv[1:]:
     file = element
     basename = os.path.splitext(file)[0]
 
-    print file, " --> ",basename+".pdb"
+    print file, " --> ",basename+".crd"
 
     m=ecmb.Molec()
     m.load_pdb( file )
