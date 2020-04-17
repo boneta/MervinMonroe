@@ -185,7 +185,7 @@ _mervin_irc_compl() {
   for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
   local p=${COMP_WORDS[COMP_CWORD-n]}
   COMPREPLY=()
-  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n--method\n-d\n--direction\n-he\n--hessian\n-l\n--locate\n-j' -- $c)); return 0; fi
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n--method\n-d\n--direction\n--steps\n-he\n--hessian\n-l\n--locate\n-j' -- $c)); return 0; fi
   case "$p" in
     -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
     -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
@@ -248,6 +248,7 @@ _mervin_tools_compl() {
     point) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n-f\n--pes\n-c' -- $c ; compgen -S ' ' -fd -- $c));;
     relative) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--val' -- $c ; compgen -S ' ' -fd -- $c));;
     trimmer) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--pes' -- $c ; compgen -S ' ' -fd -- $c));;
+    nofixer) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--crd\n--position\n--r' -- $c ; compgen -S ' ' -fd -- $c));;
     srf_grid) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n-s\n-f\n-j' -- $c ; compgen -S ' ' -fd -- $c));;
     correct-2D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--name\n--corr_name\n--pes\n--pmf\n--corr' -- $c ; compgen -S ' ' -fd -- $c));;
     wham-1D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--out\n--temp\n--conv\n--dats' -- $c ; compgen -S ' ' -fd -- $c));;

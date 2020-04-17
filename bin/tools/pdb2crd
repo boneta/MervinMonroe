@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 
-import sys
-import os
+import sys, os, fileinput
 import ecmb
 
 for element in sys.argv[1:]:
@@ -15,3 +14,7 @@ for element in sys.argv[1:]:
     m.guess_z()
     m.save_crd( basename + ".crd" )
     m=None
+
+    # Edit wrong CL mass
+    for line in fileinput.input(basename + ".crd", inplace=True):
+        sys.stdout.write( line.replace("CL            6","CL           17") )

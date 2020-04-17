@@ -17,6 +17,7 @@
   name_def="IRC"
   qm_method_def="AM1"
   irc_direction_def="full"
+  irc_steps_def=600
 
 
 ##  SCRIPT  ###########################################################
@@ -69,6 +70,11 @@
         shift
         ;;
 
+      --steps )                   # Number IRC Steps
+        irc_steps=$1
+        shift
+        ;;
+
       -he|--hessian )             # hessian dump
         hessian_dump=$1
         shift
@@ -103,6 +109,7 @@
         echo "                                     full          back and forward"
         echo "                                     back          only back (-1)"
         echo "                                     for           only forward (1)"
+        echo " --steps <#>                       number of IRC steps (def: $irc_steps_def)"
         echo " -l | --locate                     launch locate jobs after IRC"
         echo " -he | --hessian <hessian>         hessian TS file to use (i.e.: update.dump)"
         echo " -j                                job only (creates files but do not launch)"
@@ -119,6 +126,7 @@
   name=${name:=$name_def}
   qm_method=${qm_method:=$qm_method_def}
   irc_direction=${irc_direction:=$irc_direction_def}
+  irc_steps=${irc_steps:=$irc_steps_def}
   job_only=${job_only:=0}
   locate=${locate:=0}
 
@@ -150,6 +158,7 @@
         cd ${name}-${dir}
         cp ${system_dir}/*.bin  .
         cp ${system_dir}/nofix.f90  .
+        sed -i "s/MERVIN_IRC_NSTEPS/$irc_steps/g" ${name}-${dir}.f90
         if [ "$dir" == "back" ]; then
           sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}-${dir}.f90
         elif [ "$dir" == "for" ]; then
@@ -183,6 +192,7 @@
       dir=$irc_direction
       cp ${system_dir}/*.bin  .
       cp ${system_dir}/nofix.f90  .
+      sed -i "s/MERVIN_IRC_NSTEPS/$irc_steps/g" ${name}.f90
       if [ "$dir" == "back" ]; then
         sed -i "s/MERVIN_IRC_DIRECTION/-1/g" ${name}.f90
       elif [ "$dir" == "for" ]; then
