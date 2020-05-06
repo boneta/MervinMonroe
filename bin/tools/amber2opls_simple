@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+## Simplified conversor for Amber parameters to OPLS format
+## by Sergio Boneta
+
+import sys
+import math as m
+import argparse
+
+# Parser
+my_parser = argparse.ArgumentParser(prog='amber2opls_simple',
+                                    description='Convert Amber parameters to OPLS format\n\n'+
+                                                ' Amber Input:    IDIVF  PK  PHASE  PN\n'+
+                                                ' OPLS Output:    V0  V1  V2  V3  V4',
+                                    formatter_class=argparse.RawTextHelpFormatter)
+my_parser.add_argument('i',
+                       metavar='X X X X', type=float, nargs='+',
+                       help='Amber parameters (IDIVF PK PHASE PN)')
+my_parser.add_argument('--phase',
+                       metavar='rad | degree',
+                       choices=['rad', 'degree'],
+                       default='degree',
+                       help='rad or degree input (def: degree)')
+args = my_parser.parse_args()
+
+
+threshold = 10e-6    # threshold value to consider energy equal
+angle_test = 2.1     # arbitrary angle to test fitting
+
+
+#- TORSION ENERGY FUNCTIONS -------------------------------------------
+# AMBER torsion energy
+def energy_amber( angle, param ) :
+    energy = 0
+    for i in range(len(param['divider'])) :
+        if param['divider'][i] != 0 :
+            energy = energy + ( param['barrier'][i]/param['divider'][i] * (1 +  m.cos(i*angle-param['phase'][i])) )
+    return energy
+# OPLS-AA torsion energy
+def energy_opls( angle, param ) :
+    return param[0]/2 + \
+           param[1]/2 * ( 1 + m.cos(1*angle) ) + \
+           param[2]/2 * ( 1 - m.cos(2*angle) ) + \
+           param[3]/2 * ( 1 + m.cos(3*angle) ) + \
+           param[4]/2 * ( 1 - m.cos(4*angle) )
+#----------------------------------------------------------------------
+
+
+## Initialize
+amber_p = { 'divider' : [0.0]*5,            # divider
+            'barrier' : [0.0]*5,            # barrier (named 'pk' / 'kd')
+            'phase'   : [0.0]*5,            # phase (rad)
+            'pn'      : [0]*5 }             # periodicity
+
+opls_p = [ 0.0,                             # V0
+           0.0,                             # V1
+           0.0,                             # V2
+           0.0,                             # V3
+           0.0 ]                            # V4
+
+
+## Asign input parameters
+if len(args.i) % 4 == 0:
+    for n in range( int(len(args.i) / 4) ):
+        pn = abs(int(args.i[3+n*4]))
+        if 0 <= pn <= 4:
+            amber_p['divider'][pn] = args.i[0+n*4]
+            amber_p['barrier'][pn] = args.i[1+n*4]
+            amber_p['phase'][pn] = args.i[2+n*4]
+            amber_p['pn'][pn] = pn
+        else:
+            sys.stderr.write("ERROR: Periodicity must be 4 or below \n")
+            sys.exit(1)
+else:
+    sys.stderr.write("ERROR: Incomplete number of parameters (4 in every set) \n")
+    sys.exit(1)
+
+
+# degrees to radians if requested
+if args.phase == 'degree': amber_p['phase'] = [ m.radians(i) for i in amber_p['phase'] ]
+
+
+## Convert Parameters #################################################
+
+## Kasia style (Excel)
+for v in range(len(opls_p)) :
+    if amber_p['divider'][v] != 0 :
+        if v==1 and amber_p['phase'][v] == m.pi :
+            opls_p[v] = -2* amber_p['barrier'][v] / amber_p['divider'][v]
+        else:
+            opls_p[v] = 2* amber_p['barrier'][v] / amber_p['divider'][v]
+opls_p[0] = 2* ( - energy_opls( 0., opls_p) + energy_amber(0., amber_p) )
+
+
+# check if correct
+if energy_amber(0., amber_p) - energy_opls(0., opls_p) < 10e-6 \
+   and energy_amber(angle_test, amber_p) - energy_opls(angle_test, opls_p) < 10e-6:
+   sys.stdout.write("{:>8.3f} {:>8.3f} {:>8.3f} {:>8.3f} {:>8.3f} \n".format(*opls_p))
+
+## Alternative method (invert and correct 0)
+else:
+    opls_p[0] = 0
+    opls_p = [ -1*i if i !=0 else 0 for i in opls_p ]
+    opls_p[0] = 2* ( - energy_opls(0., opls_p) + energy_amber(0., amber_p) )
+
+    # check if correct or alert message
+    if energy_amber(0., amber_p) - energy_opls(0., opls_p) < 10e-6 \
+       and energy_amber(angle_test, amber_p) - energy_opls(angle_test, opls_p) < 10e-6:
+       sys.stdout.write("{:>8.3f} {:>8.3f} {:>8.3f} {:>8.3f} {:>8.3f} \n".format(*opls_p))
+    else:
+        sys.stdout.write("ERROR: Parameters do not match.  Last Parameters Calculated: ")
+        sys.stdout.write("{:>8.3f} {:>8.3f} {:>8.3f} {:>8.3f} {:>8.3f} \n".format(*opls_p))

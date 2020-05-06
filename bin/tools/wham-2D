@@ -1,145 +1,137 @@
 #!/usr/bin/python2
 
-import numpy as np
-import string
+#######################################################################
+##  Dependences                                                      ##
+#######################################################################
+
 import os
-import re
 import sys
 import argparse
+import numpy as np
 
-# Parser
-my_parser = argparse.ArgumentParser(prog='wham-2D',
-                                    description='WHAM integration of PMF calculations (2D)')
-my_parser.add_argument('--name',
-                       type=str,
-                       help='PMF name',
-                       default='pmf')
-my_parser.add_argument('--path',
-                       type=str,
-                       help='dat_* files path',
-                       default='../')
-my_parser.add_argument('--temp',
-                       type=float,
-                       help='temperature (def: 313.)',
-                       default=313.)
-my_parser.add_argument('--conv',
-                       type=float,
-                       help='wham convergence (def: 0.001)',
-                       default=0.001)
-my_parser.add_argument('--ij',
-                       metavar=('i','j'),
-                       required=True,
-                       type=int,
-                       help='i j',
-                       nargs=2)
-my_parser.add_argument('--time',
-                       required=True,
-                       type=int,
-                       help='production time (ps)')
-args = my_parser.parse_args()
 
-outname = args.name
-dir   = args.path
-temperature = args.temp
-wham_conv = args.conv
-i_val = args.ij[0]
-j_val = args.ij[1]
+#######################################################################
+##  CONSTANTS                                                        ##
+#######################################################################
 
-equilibration = 1
-acquisition = args.time*1000 + 1
+inf = 1.e30
+kB = 8.31447086363e-3  # in kJ/mol
+#kB = 0.00198587724841  # in kcal/mol
 
 name1 = 'dat_x'
 name2 = 'dat_y'
 
-#kB = 0.00198587724841  # in kcal/mol
-kB = 8.31447086363e-3  # in kJ/mol
-
-inf = 1.e30
 
 #######################################################################
-##  MAIN                                                            ###
+##  MAIN                                                             ##
 #######################################################################
+
 def main():
+    '''Main WHAM-2D program'''
 
-    coor1 = re.compile(name1 + '.*' )
-    coor2 = re.compile(name2 + '.*' )
 
-    files = os.listdir(dir)
-    coor1 = filter(lambda f, c=coor1: c.match(f) is not None, files)
-    coor2 = filter(lambda f, c=coor2: c.match(f) is not None, files)
+    ##  PARSER  #######################################################
 
+    my_parser = argparse.ArgumentParser(prog='wham-2D',
+                                        description='WHAM integration of PMF calculations (2D)')
+    my_parser.add_argument('--name',
+                        type=str,
+                        help='PMF name',
+                        default='pmf')
+    my_parser.add_argument('--path',
+                        type=str,
+                        help='dat_* files path',
+                        default='../')
+    my_parser.add_argument('--temp',
+                        type=float,
+                        help='temperature (def: 313.)',
+                        default=313.)
+    my_parser.add_argument('--conv',
+                        type=float,
+                        help='wham convergence (def: 0.001)',
+                        default=0.001)
+    my_parser.add_argument('--ij',
+                        metavar=('i','j'),
+                        required=True,
+                        type=int,
+                        help='i j',
+                        nargs=2)
+    my_parser.add_argument('--time',
+                        required=True,
+                        type=int,
+                        help='production time (ps)')
+    # execute parser                    
+    args = my_parser.parse_args()
+
+    # assignation of input variables
+    outname      = args.name
+    directory    = args.path
+    temperature  = args.temp
+    wham_conv    = args.conv
+    i_val        = args.ij[0]
+    j_val        = args.ij[1]
+
+    equilibration  = 1
+    acquisition    = args.time*1000 + 1
+
+
+    ##  INPUT  ########################################################
+
+    # get 'dat_*' file lists
+    files = os.listdir(directory)
+    coor1 = [ i for i in files if name1 in i ]
+    coor2 = [ i for i in files if name2 in i ]
     coor1.sort()
     coor2.sort()
 
+    # read 'dat_*' files
     windows = []
-    for files in map(None, coor1, coor2):
+    for files in zip(coor1, coor2):
         rc0 = []
         fc = []
         rc = []
         for fn in files:
-            print fn
-            data = open(os.path.join(dir, fn)).readlines()
-            [fcs, rc0s] = string.split( data[0] )
-            rc0.append(string.atof(string.strip(rc0s)))
-            fc.append(0.5*string.atof(string.strip(fcs)))
-            rc1 = []
-            for line in data[equilibration:equilibration+acquisition]:
-                rc1.append(string.atof(string.strip(line)))
-            rc.append(rc1)
-        print len(rc)
-        windows.append((np.array(rc0), np.array(fc), np.transpose(np.array(rc))))
+            sys.stdout.write(fn+' ')
+            data = open(os.path.join(directory, fn)).readlines()
+            # read ForceConstant and ReactionCoordinate0
+            fcs, rc0s = data[0].split()
+            fc.append( fcs )
+            rc0.append( rc0s )
+            # read coordinates
+            rc.append(data[equilibration:equilibration+acquisition])
+            sys.stdout.write(str(len(rc[-1]))+'\n')
+        # windows structure:  [ [ [rc0,rc0], [fc,fc], [[c,c],[c,c],...] ], ... ]
+        windows.append([np.array(rc0, dtype=float),
+                        np.array(fc, dtype=float) * 0.5,
+                        np.transpose(np.array(rc, dtype=float))])
 
+    # get minimums and maximums
+    _get_limits(windows)
 
-    def combine(window_list):
-        new = []
-        for w in window_list:
-            done = 0
-            for i in range(len(new)):
-                if np.logical_and.reduce(np.equal(new[i][0], w[0])) and \
-                   np.logical_and.reduce(np.equal(new[i][1], w[1])):
-                    new[i] = (new[i][0], new[i][1], np.concatenate((new[i][2],w[2])))
-                    done = 1
-                    break
-            if not done:
-                new.append(w)
-        return new
-
-    min1 = inf
-    min2 = inf
-    max1 = -inf
-    max2 = -inf
-    for rc, fc, data in windows:
-        for point in data:
-            min1 = min(min1, point[0])
-            max1 = max(max1, point[0])
-            min2 = min(min2, point[1])
-            max2 = max(max2, point[1])
-
-    print windows[1]
-    windows = combine(windows)
-    print len(windows)
+    # print information
+    sys.stdout.write("\n# No Windows: {:d}\n".format(len(windows)))
+    sys.stdout.write('# x_min: {:>7.3f}    x_max: {:>7.3f} \n'
+                     '# y_min: {:>7.3f}    y_max: {:>7.3f} \n\n'.format(min1,max1,min2,max2))
 
     sys.stdout.flush()
 
+    # combine (useless?)
+    windows = combine(windows)
+
+
+    ##  WHAM  #########################################################
     c1_bins = (min1, max1, (i_val+1)*2)
     c2_bins = (min2, max2, (j_val+1)*2)
     axes, rho, pmf = wham(windows, (c1_bins, c2_bins), temperature, wham_conv)
 
+    ##  POST PROCESS  #################################################
     big = np.equal(pmf, inf)
     pmf_min = np.minimum.reduce(np.ravel(pmf))
     pmf_out = np.choose(big, (pmf-pmf_min, 0))
     pmf_max = np.maximum.reduce(np.ravel(pmf))
 
-    def writeArray( array, filename ):
-        fd = open( filename, "wt" )
-        if len(array.shape) == 1:
-            array = array[:, np.newaxis]
-        for line in array:
-            for element in line:
-                fd.write(`element` + ' ')
-            fd.write('\n')
-        fd.close()
 
+    ##  OUTPUT  #######################################################
     # Write classic output
     writeArray(pmf_out, 'all_' + outname + '.dat')
     writeArray(axes[0], 'axes0_' + outname + '.dat')
@@ -152,13 +144,52 @@ def main():
                 f.write("%s\t%s\t%s\n" % (axes[0][i], axes[1][j], pmf_out[i][j]))
             f.write("\n")
 
-##  END MAIN  #########################################################
 
-##  FUNCTIONS  ########################################################
+#######################################################################
+##  FUNCTIONS                                                        ##
+#######################################################################
+
+def _get_limits(windows_list):
+    '''Determine minimum and maximum of x and y'''
+    global min1, min2, max1, max2
+    points_x, points_y = [], []
+    for rc, fc, data in windows_list:
+        points_x.extend([point[0] for point in data])
+        points_y.extend([point[1] for point in data])
+    min1 = min(points_x)
+    min2 = min(points_y)
+    max1 = max(points_x)
+    max2 = max(points_y)
+
+def combine(window_list):
+    '''??? Useless ???'''
+    new = []
+    for w in window_list:
+        done = False
+        for i in range(len(new)):
+            if np.logical_and.reduce(np.equal(new[i][0], w[0])) and \
+                np.logical_and.reduce(np.equal(new[i][1], w[1])):
+                new[i] = (new[i][0], new[i][1],
+                            np.concatenate((new[i][2], w[2])))
+                done = True
+                break
+        if not done:
+            new.append(w)
+    return new
+
+def writeArray( array, filename ):
+    fd = open( filename, "wt" )
+    if len(array.shape) == 1:
+        array = array[:, np.newaxis]
+    for line in array:
+        for element in line:
+            fd.write(`element` + ' ')
+        fd.write('\n')
+    fd.close()
 
 class _index_expression_class:
-    import sys
-    maxint = sys.maxint
+    try: maxint = sys.maxint
+    except: maxint = sys.maxsize
     def __getitem__(self, item):
         if type(item) != type(()):
             return (item,)
@@ -171,24 +202,29 @@ class _index_expression_class:
             stop = None
         return self[start:stop:None]
 
+##  WHAM  #############################################################
 def wham(data, bins, t, conv_limit = 0.001):
+    '''WHAM algorithm'''
+    
+    # initialization
     beta = 1./(kB*t)
     dim = len(bins)
     nwin = len(data)
     axes = map(binAxis, bins)
-    hist = []
-    pot = []
-    for window in data:
-        rc0, fc, rc = window
-        hist.append(histogram(rc, bins))
-        pot.append(biasPotential(rc0, fc, axes))
-    hist = np.array(hist)
-    pot = np.array(pot)
+
+    # build histogram and potential
+    hist = np.array([histogram(rc, bins) for rc0, fc, rc in data])
+    pot = np.array([biasPotential(rc0, fc, axes) for rc0, fc, rc in data])
+    # hist = np.array(hist)
+    # pot = np.array(pot)
+
     npoints = integrate(hist)
     index = _index_expression_class()[::] + dim*_index_expression_class()[np.newaxis]
     f = np.zeros(nwin, np.float)
     lastf = f
     num = 1.*np.add.reduce(hist, 0)
+
+    # main wham loop    
     while 1:
         #	den = np.add.reduce(npoints[index] * np.exp(beta*(f[index]-pot)))
         expnt = beta * ( f[index] - pot )
@@ -201,13 +237,16 @@ def wham(data, bins, t, conv_limit = 0.001):
         OK    = np.greater ( expnt, -200. )
         f     = - np.log ( integrate ( rho * np.exp ( np.where ( OK, expnt, -200. ) ) ) ) / beta
         convergence = np.maximum.reduce(np.fabs(f-lastf))
-        print convergence
+        sys.stdout.write("{}\n".format(convergence))
         if convergence < conv_limit: break
         lastf = f
+    
+    # post-process
     mask = np.equal(rho, 0.)
     pmf = -np.log(rho+mask)/beta + inf*mask
     pmf_min = np.minimum.reduce(np.ravel(pmf))
     pmf = pmf - pmf_min
+    
     return axes, rho, pmf
 
 def binAxis(bin_spec):
@@ -218,7 +257,7 @@ def binAxis(bin_spec):
 def histogram(data, bins):
     dim = data.shape[1]
     if dim != len(bins):
-        raise ValueError, 'Inconsistent data'
+        raise ValueError('Inconsistent data')
     min = np.array(map(lambda b: b[0], bins))
     max = np.array(map(lambda b: b[1], bins))
     n = np.array(map(lambda b: b[2], bins))
@@ -244,6 +283,6 @@ def integrate(a):
         a = np.add.reduce(a, -1)
     return a
 
-##  END FUNCTIONS  ####################################################
 
-main()
+##  MAIN EXECUTION  ###################################################
+if __name__ == '__main__': main()
