@@ -8,6 +8,7 @@ import argparse
 my_parser = argparse.ArgumentParser(prog='nofixer',
                                     description='Selection of flexible environment for fDynamo')
 my_parser.add_argument('--crd',
+                       required=True,
                        type=str,
                        help='crd file (i.e.: input.crd)')
 my_parser.add_argument('--position',

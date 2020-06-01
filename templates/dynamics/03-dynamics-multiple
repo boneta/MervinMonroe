@@ -2,7 +2,7 @@
   call constraint_initialize
 
   ! MULTIPLE DISTANCE
-  r1 = MERVIN_D0_dp MERVIN_STEP_dp
+  r1 = MERVIN_D0_dp
   call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A1 /) ) )
   call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A2 /) ) )
   call constraint_point_define( atom_selection( atom_number = (/ MERVIN_A3 /) ) )

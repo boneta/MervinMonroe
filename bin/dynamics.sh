@@ -192,7 +192,6 @@
       sed -i "s/MERVIN_A3/a${constr1[6]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_A4/a${constr1[7]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_D0/${constr1[9]}/g" ${workdir}/${name}.f90
-      sed -i "s/MERVIN_STEP/${constr1[10]}/g" ${workdir}/${name}.f90
       if [ "${constr1[1]}" == "-1" ]; then
         sed -i "s/MERVIN_WEIGHT/cof_antisym/g" ${workdir}/${name}.f90
       elif [ "${constr1[1]}" == "1" ]; then
@@ -204,7 +203,6 @@
       sed -i "s/MERVIN_A1/a${constr1[3]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_A2/a${constr1[4]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_D0/${constr1[6]}/g" ${workdir}/${name}.f90
-      sed -i "s/MERVIN_STEP/${constr1[7]}/g" ${workdir}/${name}.f90
     fi
 
     # constrain 2
@@ -216,7 +214,6 @@
       sed -i "s/MERVIN_A3/a${constr2[6]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_A4/a${constr2[7]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_D0/${constr2[9]}/g" ${workdir}/${name}.f90
-      sed -i "s/MERVIN_STEP/${constr2[10]}/g" ${workdir}/${name}.f90
       if [ "${constr2[1]}" == "-1" ]; then
         sed -i "s/MERVIN_WEIGHT/cof_antisym/g" ${workdir}/${name}.f90
       elif [ "${constr2[1]}" == "1" ]; then
@@ -228,7 +225,6 @@
       sed -i "s/MERVIN_A1/a${constr2[3]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_A2/a${constr2[4]}/g" ${workdir}/${name}.f90
       sed -i "s/MERVIN_D0/${constr2[6]}/g" ${workdir}/${name}.f90
-      sed -i "s/MERVIN_STEP/${constr2[7]}/g" ${workdir}/${name}.f90
     fi
   fi
 
