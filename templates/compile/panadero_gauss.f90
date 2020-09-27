@@ -85,6 +85,7 @@ contains
 !
 ! - or we could provide the global GRMS for the system...
 !
+    skip_abinitio = .false.
     call atoms_fix( .not. ( envi .or. core ) )
     call gradient
     t = dot_product( atmder(1:3,1), atmder(1:3,1) )
@@ -94,6 +95,7 @@ contains
     write( *, "(a,f20.10)" ) ">> Cur GRMS: ", grms
     write( *, "(a,f20.10)" ) ">> Max GRMS: ", dsqrt( t / 3._dp )
 
+    skip_abinitio = .true.
     call atoms_fix( .not. envi .or. core )
     call optimize_lbfgsb( &
       print_frequency    = mm_print_frequency, &
@@ -101,6 +103,7 @@ contains
       step_number        = mm_step_number )
     call dcd_write( dcd_file, atmcrd, boxl )
 
+    skip_abinitio = .false.
     call atoms_fix( .not. core )
     call hessian( print = .false. )
     e = etotal

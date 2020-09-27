@@ -17,7 +17,7 @@ my_parser.add_argument('--pes',
 args = my_parser.parse_args()
 
 pmffile = args.pmf
-outfile = os.path.splitext(pmffile)[0] + '-trimed' + os.path.splitext(pmffile)[1]
+outfile = os.path.splitext(pmffile)[0] + '-trim' + os.path.splitext(pmffile)[1]
 
 print "                 --   trimmer   --"
 
