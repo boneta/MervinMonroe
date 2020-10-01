@@ -1,6 +1,6 @@
 module panadero
 
-use definitions,           only : dp
+use definitions,           only : dp, skip_abinitio
 use atoms,                 only : natoms, nfree, nfixed, atmcrd, atmfix, atoms_fix, atmnam
 use mm_terms,              only : atmchg
 use dcd_io,                only : dcd_type, dcd_initialize, dcd_activate_write, dcd_write
@@ -79,13 +79,13 @@ contains
 
 ! - technically we shoud ask for the charges on the new QM geometry
 !
-!    skip_abinitio = .false.
+!    skip_cabinitio = .false.
 !    call atoms_fix( .not. acs )
 !    call energy
 !
 ! - or we could provide the global GRMS for the system...
 !
-    skip_abinitio = .false.
+    skip_cabinitio = .false.
     call atoms_fix( .not. ( envi .or. core ) )
     call gradient
     t = dot_product( atmder(1:3,1), atmder(1:3,1) )
@@ -95,7 +95,7 @@ contains
     write( *, "(a,f20.10)" ) ">> Cur GRMS: ", grms
     write( *, "(a,f20.10)" ) ">> Max GRMS: ", dsqrt( t / 3._dp )
 
-    skip_abinitio = .true.
+    skip_cabinitio = .true.
     call atoms_fix( .not. envi .or. core )
     call optimize_lbfgsb( &
       print_frequency    = mm_print_frequency, &
@@ -103,7 +103,7 @@ contains
       step_number        = mm_step_number )
     call dcd_write( dcd_file, atmcrd, boxl )
 
-    skip_abinitio = .false.
+    skip_cabinitio = .false.
     call atoms_fix( .not. core )
     call hessian( print = .false. )
     e = etotal

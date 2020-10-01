@@ -17,7 +17,7 @@
   locate_def="false"
   dynamo_v_def="std"
   FC="gfortran"
-  Olevel="-O2"
+  Olevel="-O3"
 
 ##  SCRIPT  ###########################################################
 
@@ -117,7 +117,7 @@
           $code_file ${dydir}/src/dynamo.a
       else
         $FC -DF95 -I${dydir}/src -w $Olevel -frecord-marker=4 -finit-local-zero \
-          -I. -J. \
+          -I${mervinmonroe}/${templates_subfolder}/compile/ -J. \
           $code_file ${dydir}/src/dynamo.a
       fi
       ;;

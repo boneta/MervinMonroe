@@ -2,7 +2,7 @@ CC   = gcc
 FC   = gfortran
 #CC   = mpicc
 #FC   = mpif90
-FLGS = -DUSE_XOR -DF95 -I. -J. -w -O2 -finit-local-zero
+FLGS = -DUSE_XOR -DF95 -I. -J. -w -O3 -finit-local-zero
 
 #FLGS += -DHACK_SPLN
 #FLGS += -DHACK_PERT

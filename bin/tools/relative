@@ -17,17 +17,29 @@ my_parser.add_argument('pmf',
                        type=str,
                        help='pmf file')
 my_parser.add_argument('--val',
-                       required=True,
+                       required=False,
                        type=float,
-                       help='value to take as minimum (kJ/mol)')
+                       help='energy value to make zero, otherwise use minimum')
+my_parser.add_argument('--kj',
+                       action='store_true',
+                       help='leave units in kJ/mol')
 args = my_parser.parse_args()
 
 pmffile = args.pmf
 outfile = os.path.splitext(pmffile)[0] + '-rel' + os.path.splitext(pmffile)[1]
 
 # substract minimum and convert to kcal/mol
-value=args.val
 data = np.loadtxt(pmffile, usecols=[0,1,2])
-data[:,2] = ( data[:,2] - value ) * _J2cal
+if args.val is not None:
+    value = args.val
+else:
+    value = np.min(data[:,2])
+data[:,2] -= value
+if not args.kj:
+    data[:,2] *= _J2cal
+
+# data[:,2] = data[:,2] - value
+# if not args.kj:
+#     data[:,2] = data[:,2] * _J2cal
 
 np.savetxt(outfile, data, fmt='%20.10lf', delimiter=' ')

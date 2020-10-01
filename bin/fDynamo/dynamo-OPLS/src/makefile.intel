@@ -136,4 +136,3 @@ clean:
 
 .c.o:
 	$(CC) -c $(BLGS) $< -o $@
-

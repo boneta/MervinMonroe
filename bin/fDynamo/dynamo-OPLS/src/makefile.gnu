@@ -1,6 +1,6 @@
 CC	 = gcc
 FC	 = gfortran
-FLGS =	-DF95 -I../modules -J../modules -w -O2
+FLGS =	-DF95 -I../modules -J../modules -w -O3
 
 #FLGS += -DHACK_SPLN
 FLGS += -DHACK_LAMB
@@ -130,4 +130,3 @@ clean:
 
 .c.o:
 	$(CC) -c $(FLGS) $< -o $@
-
