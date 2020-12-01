@@ -14,7 +14,7 @@
 
 ##  DEFAULT VARIABLES  ################################################
 
-  name_def="pel"
+  name_def="scan"
   qm_method_def="AM1"
 
 
@@ -111,8 +111,8 @@
 
   ## Process (if requested)
   if [ "$process" == 1 ]; then
-    mkdir pel-crd
-    mv pel.*.crd pel-crd/
+    mkdir scan-crd
+    mv pes.*.crd scan-crd/
     cp ep.XX.out ${name}-${qm_method}.dat
     exit
   fi

@@ -36,7 +36,7 @@
       gradient_tolerance = 1._dp )
 
     ! Save optimized geometry
-    call coordinates_write( "pel." // trim( si ) // ".crd" )
+    call coordinates_write( "pes." // trim( si ) // ".crd" )
 
     write( 900, "(3f20.10, 3X, I3)" ) &
       MERVIN_PRINT_CONSTR1
