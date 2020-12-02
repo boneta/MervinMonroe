@@ -10,3 +10,5 @@ bin/fDynamo/dynamo-OPLS/*.a
 # panadero binaries
 templates/compile/panadero.o
 templates/compile/panadero.mod
+
+systems/*
