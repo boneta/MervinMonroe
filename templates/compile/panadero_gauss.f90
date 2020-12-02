@@ -1,6 +1,6 @@
 module panadero
 
-use definitions,           only : dp, skip_abinitio
+use definitions,           only : dp, skip_cabinitio
 use atoms,                 only : natoms, nfree, nfixed, atmcrd, atmfix, atoms_fix, atmnam
 use mm_terms,              only : atmchg
 use dcd_io,                only : dcd_type, dcd_initialize, dcd_activate_write, dcd_write

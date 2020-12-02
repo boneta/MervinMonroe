@@ -7,9 +7,9 @@ bin/fDynamo/dynamo-OPLS/modules/*
 bin/fDynamo/dynamo-OPLS/src/*.o
 bin/fDynamo/dynamo-OPLS/*.a
 
-# panadero binaries
-templates/compile/panadero.o
-templates/compile/panadero.mod
+# compilation binaries
+templates/compile/*.o
+templates/compile/*.mod
 
 systems/*
 .initializated

@@ -4,12 +4,12 @@ program locate
   use panadero
   implicit none
 
-  integer :: i, j, qm_charge
-  logical, dimension(:), allocatable :: acs, flg
-  real( kind=dp ), dimension(:), allocatable :: x
+  integer                                     :: i, j, qm_charge
+  logical, dimension(:), allocatable          :: flg, acs
+  real( kind=dp ), dimension(:), allocatable  :: x
 
   call dynamo_header
-  ! call cabinitio_init
+  call cabinitio_init
 
   ! read binary file directly (faster)
   call mm_system_read ( "MERVIN_BIN" )
