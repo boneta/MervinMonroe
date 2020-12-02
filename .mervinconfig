@@ -43,9 +43,6 @@ if [ "$mervin_initializate" == "yes" ]; then
   if [[ ! -d "systems" ]]; then
     mkdir systems
   fi
-  # Give execution permissions
-  chmod +x mervinmonroe
-  chmod +x -R bin/
   # Compile dynamo
   echo "########  COMPILE: dynamo-OPLS"
   cd ${dynamo_std}
