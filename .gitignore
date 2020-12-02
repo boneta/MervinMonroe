@@ -12,3 +12,4 @@ templates/compile/panadero.o
 templates/compile/panadero.mod
 
 systems/*
+.initializated

@@ -26,19 +26,16 @@
 
 ##  NOHUP LAUNCHER  ###################################################
 # uncomment to set 'qsub' command as launcher in the background (nohup &)
-# function qsub() { nohup bash $1 & }
-# export -f qsub
+# function qsub() { nohup bash $1 & } && export -f qsub
 
 
 ##  FIRST TIME CONFIGURATION  #########################################
 # Check or create crucial folders. Compile fDynamo.
-# Execute only once (the first time). Modify to "yes" to execute again.
-mervin_initializate=yes
-if [ "$mervin_initializate" == "yes" ]; then
+# Execute only once (the first time).
+# Delete ${mervinmonroe}/.initializated to execute again
+if [ ! -f ${mervinmonroe}/.initializated ]; then
   origin_dir=`pwd`
   cd $mervinmonroe
-  # Modify '.mervinconfig' to be executed only once
-  sed -i "s/initializate=yes/initializate=no/" ${mervinmonroe}/.mervinconfig
   # Create systems folder
   if [[ ! -d "systems" ]]; then
     mkdir systems
@@ -56,6 +53,8 @@ if [ "$mervin_initializate" == "yes" ]; then
   make -f makefile
   cd $origin_dir
   echo "########  COMPILATION FINISHED  ########"
+  # create flag file
+  touch ${mervinmonroe}/.initializated
 fi
 
 

@@ -78,6 +78,7 @@
       read -p "Update Mervin Monroe software? (y/n): " update_response
       if [ "$update_response" == "y" ] || [ "$update_response" == "yes" ]; then
         cd $mervinmonroe
+        rm .initializated
         git fetch --all
         git reset --hard origin/master
         if [ "$?" == 0 ]; then
