@@ -11,5 +11,7 @@ bin/fDynamo/dynamo-OPLS/*.a
 templates/compile/*.o
 templates/compile/*.mod
 
+bin/tools/ecmb.pyc
+
 systems/*
 .initializated
