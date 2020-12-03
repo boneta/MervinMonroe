@@ -130,11 +130,13 @@ _mervin_minimization_compl() {
   for ((n=1;n<COMP_CWORD;++n)) ; do [[ "${COMP_WORDS[COMP_CWORD-n]}" == -* ]] && break ; done
   local p=${COMP_WORDS[COMP_CWORD-n]}
   COMPREPLY=()
-  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n--method\n--cg-steps\n--cg-tolerance\n--lbfgsb-steps\n--lbfgsb-tolerance\n-j' -- $c)); return 0; fi
+  if (( $COMP_CWORD <= 1 )) || [[ $c == -* ]]; then COMPREPLY=( $(compgen -S ' '  -W $'-h\n-n\n--name\n-s\n--system\n-c\n--coord\n-f\n--file\n--method\n-gauss\n--functional\n--basis\n--cg-steps\n--cg-tolerance\n--lbfgsb-steps\n--lbfgsb-tolerance\n--constr\n-j' -- $c)); return 0; fi
   case "$p" in
     -s|--system) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W "$(ls $mervinmonroe/systems)" -- $c));;
     -c|--coord) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.crd' -f -- $c ; compgen -S '/' -d $c));;
+    -f|--file) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -X '!*.mm' -f -- $c ; compgen -S '/' -d $c));;
     --method) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'AM1\nMNDO\nPDDG\nPM3\nRM1' -- $c));;
+    --functional) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'B3LYP\nCAM-B3LYP\nB3PW91\nO3LYP\nM06\nM06L\nM06HF\nM062X\nB97D3' -- $c));;
   esac }
 
 _mervin_pel_compl() {
@@ -246,9 +248,11 @@ _mervin_tools_compl() {
     trimmer) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--pes' -- $c ; compgen -S ' ' -fd -- $c));;
     nofixer) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--crd\n--position\n--r' -- $c ; compgen -S ' ' -fd -- $c));;
     srf_grid) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n-s\n-f\n-j' -- $c ; compgen -S ' ' -fd -- $c));;
+    correct-1D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--name\n--diff_name\n--scan\n--pmf\n--corr\n--units' -- $c ; compgen -S ' ' -fd -- $c));;
     correct-2D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--name\n--corr_name\n--pes\n--pmf\n--corr' -- $c ; compgen -S ' ' -fd -- $c));;
     wham-1D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--out\n--temp\n--conv\n--dats' -- $c ; compgen -S ' ' -fd -- $c));;
     wham-2D) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n--name\n--path\n--temp\n--conv\n--ij\n--time' -- $c ; compgen -S ' ' -fd -- $c));;
+    kies-combine) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -W $'-h\n-t\n--temp\n-r\n--reactant\n-ts\n--transition\n--freq' -- $c ; compgen -S ' ' -fd -- $c));;
     *) (( $n <= 1 )) && COMPREPLY=( $(compgen -S ' ' -fd -- $c));;
   esac }
 
