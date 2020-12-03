@@ -5,7 +5,7 @@ import math as m
 import re
 
 ## Parser
-parser = argparse.ArgumentParser(prog='kies-combine.py',
+parser = argparse.ArgumentParser(prog='kies-combine',
                                  description='Combine KIEs files',
                                  formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-t',
