@@ -1,14 +1,10 @@
 
-  call mopac_setup ( &
-    method    = 'MERVIN_METHOD', &
-    charge    = qm_charge, &
-    selection = acs )
-  call mopac_scf_options ( iterations = 500000 )
+  call cabinitio_setup( acs )
 
-
-  acs = .false.
-  call my_sele( acs )
-  call atoms_fix( .not. acs )
+  flg = .false.
+  call my_sele( flg )
+  call atoms_fix( .not. flg )
+  flg = flg .and. .not. acs
 
   call energy_initialize
 

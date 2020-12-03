@@ -6,11 +6,12 @@ program minimization
   integer                             :: i, g, qm_charge
   integer                             :: MERVIN_ATOMS
   real( kind=dp )                     :: r1, r2
-  logical, dimension(:), allocatable  :: acs
+  logical, dimension(:), allocatable  :: flg, acs
   real( kind=dp ), dimension(1:2)     :: cof_sym, cof_antisym
 
   !Print out the header
   call dynamo_header
+  call cabinitio_init
 
   ! read binary file directly (faster)
   call mm_system_read ( "MERVIN_BIN" )
@@ -18,4 +19,4 @@ program minimization
   ! read coordinates
   call coordinates_read( "MERVIN_COORD_IN" )
 
-  allocate( acs(1:natoms) )
+  allocate( flg(1:natoms), acs(1:natoms) )

@@ -1,0 +1,31 @@
+
+  !Calculate the gradient
+  call gradient
+  do g = 1, 1000
+    if( grms < 40._dp ) cycle
+    atmcrd = atmcrd - atmder / dsqrt( sum( atmder **2 ) ) * 0.01_dp
+    call gradient
+  end do
+
+  ! Minimize Conjugate-Gradient method
+  call optimize_conjugate_gradient ( &
+    step_number = MERVIN_CG_STEPS, &
+    print_frequency = 5, &
+    gradient_tolerance = MERVIN_CG_TOLERANCE_dp )
+
+  ! Minimize L-BFGS-B
+  call optimize_lbfgsb( &
+    step_number = MERVIN_LBFGSB_STEPS, &
+    print_frequency = 1, &
+    gradient_tolerance = MERVIN_LBFGSB_TOLERANCE_dp )
+
+  ! Write results
+  call coordinates_write( "MERVIN_COORD_OUT.crd" )
+  call pdb_write( "MERVIN_COORD_OUT.pdb" )
+
+  deallocate( acs )
+
+  call dynamo_footer
+
+end
+include 'nofix.f90'
