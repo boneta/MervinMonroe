@@ -1,8 +1,14 @@
+### [DEPRECATED] :no_entry::warning::skull:
+
+This project, intended as an initial attempt to simplify QM/MM calculations, has reached the end and will no longer be updated or maintained.
+
+Its evolution can be found in [DYNAMO<sup>N</sup>](http://github.com/boneta/dynamon) and [JACQUES](http://github.com/boneta/jacques)
+
+
+
 # Mervin Monroe
 
 *A lazy interface for fDynamo software*
-
-**Still under development. Use with extreme caution!**
 
 ### Usage
 ```
